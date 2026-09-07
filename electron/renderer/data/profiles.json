@@ -1,0 +1,101 @@
+{
+  "profiles": [
+    {
+      "id": "spot_rgbw_8ch",
+      "name": "Spot RGBW (8ch)",
+      "channels": 8,
+      "controls": [
+        { "name": "Rouge", "type": "channel", "offset": 0 },
+        { "name": "Vert", "type": "channel", "offset": 1 },
+        { "name": "Bleu", "type": "channel", "offset": 2 },
+        { "name": "Blanc", "type": "slider", "offset": 3, "min": 0, "max": 255 },
+        { "name": "Dimmer", "type": "slider", "offset": 4, "min": 0, "max": 255 },
+        { "name": "Flash", "type": "slider", "offset": 5, "min": 0, "max": 255 },
+        { "name": "Automatiques", "type": "slider", "offset": 6, "min": 0, "max": 255 }
+      ],
+      "hasColorPicker": true
+    },
+    {
+      "id": "starville_14ch",
+      "name": "Starville 4 Zones (14ch)",
+      "channels": 14,
+      "controls": [
+        { "name": "Z4 Rouge", "type": "channel", "offset": 0 },
+        { "name": "Z4 Vert", "type": "channel", "offset": 1 },
+        { "name": "Z4 Bleu", "type": "channel", "offset": 2 },
+        { "name": "Z3 Rouge", "type": "channel", "offset": 3 },
+        { "name": "Z3 Vert", "type": "channel", "offset": 4 },
+        { "name": "Z3 Bleu", "type": "channel", "offset": 5 },
+        { "name": "Z2 Rouge", "type": "channel", "offset": 6 },
+        { "name": "Z2 Vert", "type": "channel", "offset": 7 },
+        { "name": "Z2 Bleu", "type": "channel", "offset": 8 },
+        { "name": "Z1 Rouge", "type": "channel", "offset": 9 },
+        { "name": "Z1 Vert", "type": "channel", "offset": 10 },
+        { "name": "Z1 Bleu", "type": "channel", "offset": 11 },
+        { "name": "Flash", "type": "slider", "offset": 12, "min": 0, "max": 255 },
+        { "name": "Dimmer", "type": "slider", "offset": 13, "min": 0, "max": 255 }
+      ],
+      "hasColorPicker": false,
+      "hasZonePickers": true
+    },
+    {
+      "id": "dimmer_1ch",
+      "name": "Dimmer (1ch)",
+      "channels": 1,
+      "controls": [
+        { "name": "Dimmer", "type": "slider", "min": 0, "max": 255 }
+      ]
+    },
+    {
+      "id": "lyre_8ch",
+      "name": "Lyre 8ch",
+      "channels": 8,
+      "controls": [
+        { "name": "Dimmer", "type": "slider", "offset": 0, "min": 0, "max": 255 },
+        { "name": "Pan", "type": "slider", "offset": 1, "min": 0, "max": 255 },
+        { "name": "Tilt", "type": "slider", "offset": 2, "min": 0, "max": 255 },
+        { "name": "Vitesse", "type": "slider", "offset": 3, "min": 0, "max": 255 },
+        { "name": "Couleur", "type": "slider", "offset": 4, "min": 0, "max": 255 },
+        { "name": "Gobo", "type": "slider", "offset": 5, "min": 0, "max": 255 },
+        { "name": "Rouge", "type": "channel", "offset": 6 },
+        { "name": "Vert", "type": "channel", "offset": 7 },
+        { "name": "Bleu", "type": "channel", "offset": 8 }
+      ],
+      "hasColorPicker": true
+    },
+    {
+      "id": "lyre_12ch",
+      "name": "Lyre 12ch",
+      "channels": 12,
+      "controls": [
+        { "name": "Dimmer", "type": "slider", "offset": 0, "min": 0, "max": 255 },
+        { "name": "Pan", "type": "slider", "offset": 1, "min": 0, "max": 255 },
+        { "name": "Pan Fine", "type": "slider", "offset": 2, "min": 0, "max": 255 },
+        { "name": "Tilt", "type": "slider", "offset": 3, "min": 0, "max": 255 },
+        { "name": "Tilt Fine", "type": "slider", "offset": 4, "min": 0, "max": 255 },
+        { "name": "Vitesse", "type": "slider", "offset": 5, "min": 0, "max": 255 },
+        { "name": "Couleur", "type": "slider", "offset": 6, "min": 0, "max": 255 },
+        { "name": "Gobo", "type": "slider", "offset": 7, "min": 0, "max": 255 },
+        { "name": "Prisme", "type": "slider", "offset": 8, "min": 0, "max": 255 },
+        { "name": "Rouge", "type": "channel", "offset": 9 },
+        { "name": "Vert", "type": "channel", "offset": 10 },
+        { "name": "Bleu", "type": "channel", "offset": 11 }
+      ],
+      "hasColorPicker": true
+    },
+    {
+      "id": "wash_6ch",
+      "name": "Wash 6ch",
+      "channels": 6,
+      "controls": [
+        { "name": "Dimmer", "type": "slider", "offset": 0, "min": 0, "max": 255 },
+        { "name": "Rouge", "type": "channel", "offset": 1 },
+        { "name": "Vert", "type": "channel", "offset": 2 },
+        { "name": "Bleu", "type": "channel", "offset": 3 },
+        { "name": "Vitesse", "type": "slider", "offset": 4, "min": 0, "max": 255 },
+        { "name": "Mode", "type": "slider", "offset": 5, "min": 0, "max": 255 }
+      ],
+      "hasColorPicker": true
+    }
+  ]
+}

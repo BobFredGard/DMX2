@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DMX Control</title>
+    <link rel="stylesheet" type="text/css" href="coloris.css">
+    <link rel="stylesheet" type="text/css" href="styles.css">
+    <script type="text/javascript" src="coloris.js"></script>
+</head>
+<body>
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- Options Modal -->
+    <div id="optionsModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:450px;">
+            <div class="modal-header">
+                <h2>Options</h2>
+                <span class="close" id="closeOptions">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>Port série (DMX)</h4>
+                <div class="options-row">
+                    <select id="optionsPortSelect" class="options-select" style="flex:1;">
+                        <option value="">-- Choisir un port --</option>
+                    </select>
+                    <button id="btnOptionsRefreshPorts" class="btn btn-sm">⟳</button>
+                </div>
+                <div class="options-row" style="margin-top:6px;">
+                    <button id="btnOptionsConnect" class="btn btn-sm btn-accent">Connecter</button>
+                    <span id="optionsConnectionStatus" class="connection-dot disconnected"></span>
+                </div>
+
+                <h4 style="margin-top:18px;">MIDI - Ports d'entrée</h4>
+                <div id="midiPortList" class="midi-port-list"></div>
+                <button id="btnRefreshMidi" class="btn btn-sm" style="margin-top:8px;">Rafraîchir</button>
+                <h4 style="margin-top:14px;">MIDI - Canal</h4>
+                <div class="options-row">
+                    <label>Canal d'entrée :</label>
+                    <select id="midiChannelSelect" class="options-select">
+                        <option value="0">1</option>
+                        <option value="1">2</option>
+                        <option value="2">3</option>
+                        <option value="3">4</option>
+                        <option value="4">5</option>
+                        <option value="5">6</option>
+                        <option value="6" selected>7</option>
+                        <option value="7">8</option>
+                        <option value="8">9</option>
+                        <option value="9">10</option>
+                        <option value="10">11</option>
+                        <option value="11">12</option>
+                        <option value="12">13</option>
+                        <option value="13">14</option>
+                        <option value="14">15</option>
+                        <option value="15">16</option>
+                    </select>
+                </div>
+                <div class="form-actions" style="margin-top:18px;">
+                    <button id="btnSaveOptions" class="btn btn-accent">Appliquer</button>
+                    <button id="btnCancelOptions" class="btn">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:500px;">
+            <div class="modal-header">
+                <h2>Aide - Raccourcis</h2>
+                <span class="close" id="closeHelp">&times;</span>
+            </div>
+            <div class="modal-body">
+                <h4>Scènes</h4>
+                <table class="help-table">
+                    <tr><td>Clic</td><td>Activer la scène</td></tr>
+                    <tr><td>Ctrl + Clic</td><td>Sauvegarder (vague OFF)</td></tr>
+                    <tr><td>Ctrl + Shift + Clic</td><td>Sauvegarder (avec vague)</td></tr>
+                    <tr><td>Shift + Clic</td><td>Supprimer la scène</td></tr>
+                </table>
+                <h4>Appareils</h4>
+                <table class="help-table">
+                    <tr><td>Clic droit</td><td>Ouvrir les sliders avancés</td></tr>
+                </table>
+                <h4>Vague</h4>
+                <table class="help-table">
+                    <tr><td>Case "Vague"</td><td>Inclure l'appareil dans la vague</td></tr>
+                    <tr><td>Slider vitesse</td><td>Vitesse de la vague</td></tr>
+                </table>
+                <h4>Liens</h4>
+                <table class="help-table">
+                    <tr><td>l12</td><td>Lier les canaux 1 et 2</td></tr>
+                    <tr><td>l34</td><td>Lier les canaux 3 et 4</td></tr>
+                    <tr><td>lall</td><td>Lier tous les canaux</td></tr>
+                </table>
+                <h4>Menus système</h4>
+                <table class="help-table">
+                    <tr><td>Ctrl + N</td><td>Nouveau set</td></tr>
+                    <tr><td>Ctrl + S</td><td>Exporter set</td></tr>
+                    <tr><td>Ctrl + O</td><td>Importer set</td></tr>
+                    <tr><td>Ctrl + R</td><td>Rafraîchir</td></tr>
+                    <tr><td>Ctrl + Shift + C</td><td>Copier l'état</td></tr>
+                    <tr><td>Ctrl + Shift + V</td><td>Coller l'état</td></tr>
+                    <tr><td>Ctrl + Shift + S</td><td>Sauver dans playlist</td></tr>
+                    <tr><td>F12</td><td>Outils de développement</td></tr>
+                    <tr><td>F11</td><td>Plein écran</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div id="promptModal" class="modal" style="display:none;">
+        <div class="modal-content" style="max-width:350px;">
+            <div class="modal-header">
+                <h2 id="promptTitle">Question</h2>
+            </div>
+            <div class="modal-body">
+                <input type="text" id="promptInput" style="width:100%;padding:8px;background:rgba(255,255,255,0.08);color:#fff;border:1px solid rgba(255,255,255,0.15);border-radius:4px;font-size:0.9rem;">
+                <div class="form-actions" style="margin-top:14px;">
+                    <button id="promptOk" class="btn btn-accent">OK</button>
+                    <button id="promptCancel" class="btn">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navbar -->
+    <div id="appContent" class="app-content">
+    <nav class="navbar">
+        <div class="navbar-brand">DMX CONTROL</div>
+        <div class="navbar-center">
+            <span id="currentSongDisplay" class="current-song"></span>
+        </div>
+        <div class="navbar-connection">
+            <div class="navbar-separator"></div>
+            <span class="connection-label">MIDI</span>
+            <span id="midiStatus" class="connection-dot disconnected" title="MIDI déconnecté"></span>
+            <div class="navbar-separator"></div>
+            <span class="connection-label">DMX</span>
+            <span id="connectionStatus" class="connection-dot disconnected" title="Déconnecté"></span>
+            <div class="navbar-separator"></div>
+        </div>
+        <div class="navbar-links">
+            <button id="btnAddFixture" class="btn btn-sm btn-accent">+ Appareil</button>
+            <div class="navbar-separator"></div>
+            <div class="navbar-group-song">
+                <button id="btnPlaylist" class="btn btn-sm btn-song">Playlist</button>
+                <button id="btnLive" class="btn btn-sm btn-live">LIVE</button>
+                <button id="btnSaveCurrentSong" class="btn btn-sm btn-song">Sauver</button>
+                <button id="btnSaveNewSong" class="btn btn-sm btn-song">Sauve New</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Group Toolbar -->
+    <div class="group-toolbar" id="groupToolbar">
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label">TOUS</label>
+            <input id="groupColorAll" type="text" class="group-color-all" value="rgb(255, 0, 0)">
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div id="groupToolbarItems" class="group-toolbar-items"></div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
+            <button id="btnWave" class="btn btn-sm btn-vague">Vague</button>
+        </div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label">Vitesse</label>
+            <input type="range" id="waveSpeed" min="0" max="127" value="64" class="wave-speed-slider">
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" id="starEnabled" class="spot-link-cb"> Étoiles
+            </label>
+        </div>
+        <div class="group-toolbar-item" id="starFreqGroup" style="display:none;">
+            <label class="group-toolbar-label">Scintillement</label>
+            <input type="range" id="starFreq" min="0" max="127" value="64" class="wave-speed-slider" title="Fréquence des étoiles">
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label" style="display:flex;align-items:center;gap:4px;cursor:pointer;">
+                <input type="checkbox" id="waveColorEnabled" class="spot-link-cb"> Plage
+            </label>
+        </div>
+        <div class="group-toolbar-item" id="waveColorGroup" style="display:none;">
+            <input type="text" id="waveColorStart" class="coloris wave-color-input" value="#ff0000" data-coloris>
+            <div id="waveColorGradient" class="wave-color-gradient"></div>
+            <input type="text" id="waveColorEnd" class="coloris wave-color-input" value="#ff00ff" data-coloris>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <main class="scroll-container">
+        <section class="section" id="fixturesContainer">
+            <!-- Fixture cards generated dynamically -->
+        </section>
+
+        <!-- Sliders Section (dynamic) -->
+        <section class="section" id="slidersSection" style="display:none;">
+            <div class="sliders-grid" id="slidersGrid"></div>
+        </section>
+    </main>
+
+    <!-- Fixed Bottom Bar -->
+    <div class="bottom-bar" id="bottomBar">
+        <div class="bottom-bar-tabs">
+            <div class="tab-notes-group">
+                <input type="text" id="songNotes" class="tab-song-notes" placeholder="Notes..." maxlength="200">
+            </div>
+        </div>
+        <div class="scene-row" id="sceneRow">
+            <div class="scene-all" id="sceneAll"></div>
+        </div>
+    </div>
+    </div><!-- /appContent -->
+
+    <!-- Fixture Detail Panel (bottom) -->
+    <div id="fixturePanel" class="fixture-panel hidden">
+        <div class="fixture-panel-header">
+            <h3 id="fixturePanelName"></h3>
+            <span id="fixturePanelChInfo" class="fixture-channel-info"></span>
+            <span class="fixture-panel-hint">Clic en dehors ou Échap pour fermer</span>
+            <button id="fixturePanelClose" class="btn btn-sm">&times;</button>
+        </div>
+        <div id="fixturePanelBody" class="fixture-panel-body"></div>
+    </div>
+
+    <!-- Add Fixture Modal -->
+    <div id="addFixtureModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Ajouter un appareil</h2>
+                <span class="close" id="closeAddFixture">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Nom</label>
+                    <input type="text" id="fixtureName" placeholder="Ex: Spot 1, Lyre 2...">
+                </div>
+                <div class="form-group">
+                    <label>Profil</label>
+                    <select id="fixtureProfile"></select>
+                </div>
+                <div class="form-group" id="customChannelsGroup" style="display:none;">
+                    <label>Nombre de canaux</label>
+                    <input type="number" id="fixtureChannels" min="1" max="512" value="3">
+                </div>
+                <div class="form-group" id="customChannelRoles" style="display:none;">
+                    <label>Rôle de chaque canal</label>
+                    <div id="channelRolesList" class="channel-roles-list"></div>
+                </div>
+                <div class="form-group">
+                    <label>Canal DMX de départ</label>
+                    <input type="number" id="fixtureStartChannel" min="1" max="512" value="1">
+                    <small id="nextAvailableChannel" class="form-hint"></small>
+                </div>
+                <div class="form-group">
+                    <label>Couleur d'identification</label>
+                    <input type="color" id="fixtureColor" value="#ff4444">
+                </div>
+                <div class="form-group">
+                    <label>Quantité</label>
+                    <input type="number" id="fixtureQuantity" min="1" max="50" value="1">
+                    <small class="form-hint">Créer plusieurs appareils en une fois</small>
+                </div>
+                <div class="form-actions">
+                    <button id="btnConfirmAddFixture" class="btn btn-accent">Ajouter</button>
+                    <button id="btnCancelAddFixture" class="btn">Annuler</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Editor Modal -->
+    <div id="profileEditorModal" class="modal" style="display:none;">
+        <div class="modal-content modal-wide">
+            <div class="modal-header">
+                <h2>Éditeur de profils</h2>
+                <span class="close" id="closeProfileEditor">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="profile-editor-layout">
+                    <div class="profile-editor-sidebar">
+                        <button id="btnNewProfile" class="btn btn-accent btn-sm" style="width:100%;margin-bottom:8px;">+ Nouveau</button>
+                        <div id="profileList" class="profile-editor-list"></div>
+                    </div>
+                    <div class="profile-editor-form">
+                        <div class="form-group">
+                            <label>Nom</label>
+                            <input type="text" id="profileEditorName" placeholder="Nom du profil">
+                        </div>
+                        <div class="form-group">
+                            <label>Nombre de canaux</label>
+                            <input type="number" id="profileEditorChannels" min="1" max="512" value="3">
+                        </div>
+                        <div id="profileEditorRoles" class="profile-editor-roles"></div>
+                        <div class="profile-editor-actions">
+                            <button id="btnSaveProfile" class="btn btn-accent">Enregistrer</button>
+                            <button id="btnDuplicateProfile" class="btn">Dupliquer</button>
+                            <button id="btnDeleteProfile" class="btn btn-danger">Supprimer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Playlist Sidebar -->
+    <aside id="playlistSidebar" class="playlist-sidebar">
+        <div class="playlist-sidebar-header">
+            <h3 id="sidebarTitle">Playlist</h3>
+            <button id="closePlaylistSidebar" class="btn btn-sm">&times;</button>
+        </div>
+
+        <!-- LIVE View -->
+        <div id="liveView" class="sidebar-view" style="display:none;">
+            <div class="live-current" id="liveCurrentSong">Aucune chanson</div>
+            <div class="live-buttons" id="liveButtons"></div>
+        </div>
+
+        <!-- Playlist View -->
+        <div id="playlistView" class="sidebar-view">
+            <ul id="playlistItems" class="playlist-list"></ul>
+            <input type="file" id="playlistFileInput" accept=".json" style="display:none">
+        </div>
+    </aside>
+
+    <div id="playlistContextMenu" class="context-menu" style="display:none;">
+        <button id="ctxDuplicate" class="context-menu-item">Dupliquer</button>
+        <button id="ctxDelete" class="context-menu-item danger">Supprimer</button>
+    </div>
+
+    <script>
+        window.addEventListener('error', (e) => console.error('Uncaught:', e.error));
+        window.addEventListener('unhandledrejection', (e) => console.error('Rejection:', e.reason));
+    </script>
+    <script type="text/javascript" src="fixtures.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+</body>
+</html>
