@@ -2424,7 +2424,8 @@ function runWave() {
 
     const speedInput = document.getElementById('waveSpeed');
     const baseSpeed = speedInput ? speedInput.value * 0.00005 : 0.0005;
-    const speed = useCustomRange ? baseSpeed * 4 : baseSpeed;
+    const speedX2 = document.getElementById('waveSpeedX2').checked ? 2 : 1;
+    const speed = (useCustomRange ? baseSpeed * 4 : baseSpeed) * speedX2;
     waveOffset += speed;
 
     let startHue = 0, endHue = 360;
