@@ -2712,43 +2712,84 @@ function flashTick() {
     const durationMs = (durationBeats / bpm) * 60000;
     const halfMs = durationMs / 2;
 
+    if (!flashTick._unitIndex) flashTick._unitIndex = 0;
+
+    const units = [];
     activeIds.forEach(id => {
         const fixture = FixtureManager.getFixture(id);
         if (!fixture) return;
-        flashOnFixture(id);
         const profile = FixtureManager.getProfile(fixture.profileId);
         const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
         if (zoneCount > 1) {
-            const off = (zoneCount - 1) * 3;
-            fixture._flashPeakColor = {
-                r: fixture.channelValues[off] || 0,
-                g: fixture.channelValues[off + 1] || 0,
-                b: fixture.channelValues[off + 2] || 0
-            };
-        } else if (FixtureManager.isRGBFixture(fixture)) {
-            const rgb = FixtureManager.getFixtureRGB(fixture.id);
-            fixture._flashPeakColor = rgb ? { r: rgb.r, g: rgb.g, b: rgb.b } : { r: 255, g: 255, b: 255 };
+            for (let z = 0; z < zoneCount; z++) units.push({ fixtureId: id, zone: z, zoneCount });
+        } else {
+            units.push({ fixtureId: id, zone: -1, zoneCount: 0 });
         }
-        sendDMXBuffer();
-        updateAllFixtureDisplays();
-        setTimeout(() => {
-            const fadeStart = performance.now();
-            function fadeStep(now) {
-                const elapsed = now - fadeStart;
-                const progress = Math.min(elapsed / halfMs, 1);
-                flashFadeToBlack(id, progress);
-                sendDMXBuffer();
-                updateAllFixtureDisplays();
-                if (progress < 1) requestAnimationFrame(fadeStep);
-                else { fixture._flashPeakColor = null; }
-            }
-            requestAnimationFrame(fadeStep);
-        }, halfMs);
     });
+
+    if (units.length === 0) return;
+
+    const unit = units[flashTick._unitIndex % units.length];
+    flashTick._unitIndex = (flashTick._unitIndex + 1) % units.length;
+
+    const fixture = FixtureManager.getFixture(unit.fixtureId);
+    if (!fixture) return;
+
+    const colorMode = document.getElementById('flashColorMode').value;
+    let r, g, b;
+    if (colorMode === 'specific') {
+        const rgb = hexToRgb(fixture.flashColor || '#ffffff');
+        r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
+    } else {
+        r = Math.floor(Math.random() * 256);
+        g = Math.floor(Math.random() * 256);
+        b = Math.floor(Math.random() * 256);
+    }
+
+    if (unit.zone >= 0) {
+        const off = (unit.zoneCount - 1 - unit.zone) * 3;
+        FixtureManager.setChannelValue(fixture.id, off, r);
+        FixtureManager.setChannelValue(fixture.id, off + 1, g);
+        FixtureManager.setChannelValue(fixture.id, off + 2, b);
+        fixture._flashPeakColor = { r, g, b, zone: unit.zone, zoneCount: unit.zoneCount };
+    } else if (FixtureManager.isRGBFixture(fixture)) {
+        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+        fixture._flashPeakColor = { r, g, b, zone: -1 };
+    }
+
+    sendDMXBuffer();
+    updateAllFixtureDisplays();
+
+    setTimeout(() => {
+        const fadeStart = performance.now();
+        function fadeStep(now) {
+            const elapsed = now - fadeStart;
+            const progress = Math.min(elapsed / halfMs, 1);
+            const pk = fixture._flashPeakColor;
+            if (!pk) return;
+            const fr = Math.round(pk.r * (1 - progress));
+            const fg = Math.round(pk.g * (1 - progress));
+            const fb = Math.round(pk.b * (1 - progress));
+            if (pk.zone >= 0) {
+                const off = (pk.zoneCount - 1 - pk.zone) * 3;
+                FixtureManager.setChannelValue(fixture.id, off, fr);
+                FixtureManager.setChannelValue(fixture.id, off + 1, fg);
+                FixtureManager.setChannelValue(fixture.id, off + 2, fb);
+            } else if (FixtureManager.isRGBFixture(fixture)) {
+                FixtureManager.setFixtureColor(fixture.id, fr, fg, fb);
+            }
+            sendDMXBuffer();
+            updateAllFixtureDisplays();
+            if (progress < 1) requestAnimationFrame(fadeStep);
+            else fixture._flashPeakColor = null;
+        }
+        requestAnimationFrame(fadeStep);
+    }, halfMs);
 }
 
 function startFlashEngine() {
     if (flashIntervalId) return;
+    flashTick._unitIndex = 0;
     const bpm = flashBPM || 120;
     const triggerBeats = parseFloat(document.getElementById('flashTrigger').value) || 1;
     const intervalMs = (triggerBeats / bpm) * 60000;
