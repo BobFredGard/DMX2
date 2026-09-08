@@ -231,6 +231,20 @@
         </div>
         <div class="group-toolbar-separator"></div>
         <div class="group-toolbar-item">
+            <label class="group-toolbar-label">Mode</label>
+            <select id="flashMode" class="flash-select">
+                <option value="random">Aléatoire</option>
+                <option value="sequential">Zones séquentielles</option>
+                <option value="group4">Groupe de 4</option>
+            </select>
+        </div>
+        <div class="group-toolbar-item" id="flashReverseGroup" style="display:none;">
+            <label class="group-toolbar-label" style="display:flex;align-items:center;gap:3px;cursor:pointer;">
+                <input type="checkbox" id="flashReverse" class="spot-link-cb"> Inverser
+            </label>
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
             <label class="group-toolbar-label">Couleur</label>
             <select id="flashColorMode" class="flash-select">
                 <option value="random">Aléatoire</option>
