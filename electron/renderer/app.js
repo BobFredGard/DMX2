@@ -278,13 +278,13 @@ function scheduleAutoSave() {
 
 function sendDMXBuffer() {
     const now = Date.now();
-    if (now - lastSendTime < 20) {
+    if (now - lastSendTime < 2) {
         if (!sendThrottle) {
             sendThrottle = setTimeout(() => {
                 sendThrottle = null;
                 lastSendTime = Date.now();
                 actuallySendDMX();
-            }, 20 - (now - lastSendTime));
+            }, 2 - (now - lastSendTime));
         }
         return;
     }
