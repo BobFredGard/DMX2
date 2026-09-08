@@ -29,7 +29,7 @@
 #define DMX_DIR_PIN    21   // GPIO connected to MAX485 DE/RE
 
 #define DMX_MAX_CHANNELS 512
-#define SERIAL_BAUD       460800
+#define SERIAL_BAUD       921600
 
 // ============================================
 // GLOBAL STATE
@@ -85,8 +85,9 @@ void processFullPacket() {
 void processSingleUpdate(uint16_t channel, uint8_t value) {
     if (channel >= 1 && channel <= DMX_MAX_CHANNELS) {
         dmxData[channel - 1] = value;
-        dmx_write(dmxPort, dmxData, DMX_MAX_CHANNELS);
-        dmx_send_num(dmxPort, DMX_MAX_CHANNELS);
+        uint16_t nbChannels = channel;
+        dmx_write(dmxPort, dmxData, nbChannels);
+        dmx_send_num(dmxPort, nbChannels);
         
         Serial.write(0xFE);
         Serial.write(0x00);

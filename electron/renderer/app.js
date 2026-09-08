@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 console.log('Already connected:', connected);
                 if (!connected) {
                     console.log('Attempting connect to:', lastPort);
-                    const result = await window.serial.connect(lastPort, 460800);
+                    const result = await window.serial.connect(lastPort, 921600);
                     console.log('Connect result:', result);
                     if (result.success) {
                         showToast('Reconnecté à ' + lastPort);
@@ -116,7 +116,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                         console.log('First attempt failed, retrying in 2s...');
                         setTimeout(async () => {
                             try {
-                                const retry = await window.serial.connect(lastPort, 460800);
+                                const retry = await window.serial.connect(lastPort, 921600);
                                 console.log('Retry result:', retry);
                                 if (retry.success) showToast('Reconnecté à ' + lastPort);
                             } catch (e) { console.error('Retry error:', e); }
@@ -225,7 +225,7 @@ async function toggleConnection() {
         const portPath = portSelect.value;
         if (!portPath) { showToast('Sélectionnez un port'); return; }
         statusDot.className = 'connection-dot connecting';
-        const result = await window.serial.connect(portPath, 460800);
+        const result = await window.serial.connect(portPath, 921600);
         if (result.success) {
             localStorage.setItem('dmx2_lastPort', portPath);
         } else {
@@ -2601,7 +2601,7 @@ function setupOptionsModal() {
             const portPath = portSelect.value;
             if (!portPath) { showToast('Sélectionnez un port'); return; }
             statusDot.className = 'connection-dot connecting';
-        const result = await window.serial.connect(portPath, 460800);
+        const result = await window.serial.connect(portPath, 921600);
             if (result.success) {
                 localStorage.setItem('dmx2_lastPort', portPath);
             } else {
