@@ -77,6 +77,7 @@ const FixtureManager = (() => {
             waveEnabled: config.waveEnabled !== undefined ? config.waveEnabled : false,
             momentaryEnabled: config.momentaryEnabled !== undefined ? config.momentaryEnabled : true,
             zoneLinks: config.zoneLinks || { l12: false, l34: false, lall: false },
+            reverseWave: config.reverseWave || false,
             channelValues: new Uint8Array(config.channels || 3).fill(0)
         };
         if (profile && profile.controls) {
@@ -200,6 +201,13 @@ const FixtureManager = (() => {
         const fixture = fixtures.find(f => f.id === fixtureId);
         if (!fixture) return;
         fixture.waveEnabled = enabled;
+        scheduleSave();
+    }
+
+    function setReverseWave(fixtureId, value) {
+        const fixture = fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+        fixture.reverseWave = value;
         scheduleSave();
     }
 
@@ -485,6 +493,7 @@ const FixtureManager = (() => {
                 startChannel: f.startChannel,
                 color: f.color,
                 waveEnabled: f.waveEnabled,
+                reverseWave: f.reverseWave || false,
                 momentaryEnabled: f.momentaryEnabled !== undefined ? f.momentaryEnabled : true,
                 zoneLinks: f.zoneLinks || { l12: false, l34: false, lall: false },
                 channelValues: Array.from(f.channelValues)
@@ -577,7 +586,7 @@ const FixtureManager = (() => {
         addFixture, removeFixture, getFixtures, getFixture,
         getProfiles, getProfile,
         setChannelValue, setChannelValuesBulk, getDMXChannels,
-        setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setMomentaryEnabled, setZoneLink, getZoneLinks,
+        setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setReverseWave, setMomentaryEnabled, setZoneLink, getZoneLinks,
         getNextAvailableChannel, isChannelRangeFree,
         addGroup, removeGroup, renameGroup, setGroupFixtures,
         addFixtureToGroup, removeFixtureFromGroup, setGroupColor,

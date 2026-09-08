@@ -657,6 +657,22 @@ function renderFixtureCard(fixture, targetContainer) {
             setTimeout(() => reinitColorisInstance('#fixtureZone-' + fixture.id + '-z' + z), 50 + z * 20);
         }
         card.appendChild(zonesContainer);
+
+        const reverseDiv = document.createElement('div');
+        reverseDiv.className = 'fixture-zone-reverse';
+        const reverseCb = document.createElement('input');
+        reverseCb.type = 'checkbox';
+        reverseCb.checked = fixture.reverseWave || false;
+        reverseCb.title = 'Inverser le sens de la vague (droite à gauche)';
+        const reverseLabel = document.createElement('label');
+        reverseLabel.className = 'slider-label';
+        reverseLabel.textContent = 'Vague inversée';
+        reverseLabel.prepend(reverseCb);
+        reverseDiv.appendChild(reverseLabel);
+        card.appendChild(reverseDiv);
+        reverseCb.addEventListener('change', (e) => {
+            FixtureManager.setReverseWave(fixture.id, e.target.checked);
+        });
     }
 
     // Single color picker (in card)
@@ -2174,7 +2190,7 @@ function startSceneFade(targetValues, duration) {
 
                 if (profile && profile.hasZonePickers) {
                     const zoneCount = Math.floor(fixture.channels / 3);
-                    for (let z = 0; z < zoneCount; z++) {
+        for (let z = 0; z < zoneCount; z++) {
                         const off = (zoneCount - 1 - z) * 3;
                         const baseTarget = fixture.startChannel + off;
                         for (let c = 0; c < 3; c++) {
@@ -2468,6 +2484,7 @@ function runWave() {
         const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 1;
 
         for (let z = 0; z < zoneCount; z++) {
+            const zMapped = fixture.reverseWave ? (zoneCount - 1 - z) : z;
             let r, g, b;
 
             if (useCustomRange && startRgb && endRgb) {
@@ -2498,7 +2515,7 @@ function runWave() {
             }
 
             if (zoneCount > 1) {
-                const off = (zoneCount - 1 - z) * 3;
+                const off = (zoneCount - 1 - zMapped) * 3;
                 FixtureManager.setChannelValue(fixture.id, off, r);
                 FixtureManager.setChannelValue(fixture.id, off + 1, g);
                 FixtureManager.setChannelValue(fixture.id, off + 2, b);
@@ -2761,6 +2778,7 @@ function getCurrentSetData() {
             channelValues: Array.from(f.channelValues),
             zoneLinks: f.zoneLinks ? { ...f.zoneLinks } : { l12: false, l34: false, lall: false },
             waveEnabled: f.waveEnabled,
+            reverseWave: f.reverseWave || false,
             momentaryEnabled: f.momentaryEnabled !== false
         })),
         scenes: JSON.parse(JSON.stringify(scenes)),
@@ -2828,6 +2846,9 @@ function loadSetData(setData) {
                 }
                 if (sf.waveEnabled !== undefined) {
                     FixtureManager.setWaveEnabled(sf.id, sf.waveEnabled);
+                }
+                if (sf.reverseWave !== undefined) {
+                    FixtureManager.setReverseWave(sf.id, sf.reverseWave);
                 }
                 if (sf.momentaryEnabled !== undefined) {
                     FixtureManager.setMomentaryEnabled(sf.id, sf.momentaryEnabled);
@@ -2994,6 +3015,9 @@ function applySongEndState(setData) {
             }
             if (fixture && sf.waveEnabled !== undefined) {
                 FixtureManager.setWaveEnabled(sf.id, sf.waveEnabled);
+            }
+            if (fixture && sf.reverseWave !== undefined) {
+                FixtureManager.setReverseWave(sf.id, sf.reverseWave);
             }
         });
     }
