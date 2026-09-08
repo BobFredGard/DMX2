@@ -1789,6 +1789,7 @@ function restoreSceneState(scene) {
         });
     }
     if (scene.waveSpeed !== undefined) document.getElementById('waveSpeed').value = scene.waveSpeed;
+    if (scene.waveSpeedX2 !== undefined) document.getElementById('waveSpeedX2').checked = scene.waveSpeedX2;
     if (scene.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = scene.starEnabled;
         document.getElementById('starFreqGroup').style.display = scene.starEnabled ? '' : 'none';
@@ -1862,6 +1863,7 @@ function captureSceneData() {
         values, waveStates, zoneLinks, spotLinks,
         waveRunning,
         waveSpeed: parseInt(document.getElementById('waveSpeed').value) || 64,
+        waveSpeedX2: document.getElementById('waveSpeedX2').checked,
         starEnabled: document.getElementById('starEnabled').checked,
         starFreq: parseInt(document.getElementById('starFreq').value) || 64,
         waveColorStart: document.getElementById('waveColorStart').value,
@@ -3063,6 +3065,8 @@ function getCurrentSetData() {
         spotLinks: {},
         groupColors: {},
         waveRunning: waveRunning,
+        waveSpeed: parseInt(document.getElementById('waveSpeed').value) || 64,
+        waveSpeedX2: document.getElementById('waveSpeedX2').checked,
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
         flashColorMode: document.getElementById('flashColorMode').value,
@@ -3202,6 +3206,9 @@ function loadSetData(setData) {
 
     if (setData.waveSpeed !== undefined) {
         document.getElementById('waveSpeed').value = setData.waveSpeed;
+    }
+    if (setData.waveSpeedX2 !== undefined) {
+        document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
     }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
@@ -3383,6 +3390,9 @@ function liveLoadSong(index) {
     if (setData.waveSpeed !== undefined) {
         document.getElementById('waveSpeed').value = setData.waveSpeed;
     }
+    if (setData.waveSpeedX2 !== undefined) {
+        document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
+    }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
         document.getElementById('starFreqGroup').style.display = setData.starEnabled ? '' : 'none';
@@ -3399,6 +3409,31 @@ function liveLoadSong(index) {
     if (setData.waveColorEnabled !== undefined) {
         document.getElementById('waveColorEnabled').checked = setData.waveColorEnabled;
         document.getElementById('waveColorGroup').style.display = setData.waveColorEnabled ? '' : 'none';
+    }
+
+    if (setData.flashTrigger !== undefined) document.getElementById('flashTrigger').value = setData.flashTrigger;
+    if (setData.flashDuration !== undefined) document.getElementById('flashDuration').value = setData.flashDuration;
+    if (setData.flashColorMode !== undefined) {
+        document.getElementById('flashColorMode').value = setData.flashColorMode;
+        document.getElementById('flashColorGroup').style.display = setData.flashColorMode === 'specific' ? '' : 'none';
+    }
+    if (setData.flashBPM !== undefined) {
+        flashBPM = setData.flashBPM;
+        document.getElementById('flashBPM').textContent = flashBPM || '---';
+    }
+    if (setData.flashStates) {
+        stopFlashEngine();
+        flashActiveFixtures.clear();
+        Object.entries(setData.flashStates).forEach(([fid, active]) => {
+            const f = FixtureManager.getFixture(fid);
+            if (f) { f.flashEnabled = active; if (active) flashActiveFixtures.add(fid); }
+        });
+        updateFlashFixturesList();
+        document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
+            const fid = cb.dataset.id;
+            if (fid && setData.flashStates[fid] !== undefined) cb.checked = setData.flashStates[fid];
+        });
+        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
     }
 
     if (setData.scenes && Array.isArray(setData.scenes)) {
