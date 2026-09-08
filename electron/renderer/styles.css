@@ -1532,3 +1532,55 @@ body.sidebar-open .bottom-bar {
 }
 .context-menu-item:hover { background: rgba(0,180,220,0.15); color: #fff; }
 .context-menu-item.danger:hover { background: rgba(255,69,58,0.15); color: #ff453a; }
+
+/* Flash Toolbar */
+.flash-toolbar { background: linear-gradient(135deg, rgba(80, 20, 20, 0.65), rgba(60, 15, 30, 0.65)) !important; }
+.btn-flash {
+    background: linear-gradient(135deg, #ff3b30, #ff6b35) !important;
+    color: #fff !important;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.btn-flash:hover { background: linear-gradient(135deg, #ff5544, #ff7744) !important; }
+.btn-flash.active { background: linear-gradient(135deg, #ffcc00, #ff9500) !important; box-shadow: 0 0 12px rgba(255, 200, 0, 0.6); }
+.btn-tap {
+    background: linear-gradient(135deg, #555, #333) !important;
+    color: #ddd !important;
+    font-weight: 600;
+    min-width: 48px;
+}
+.btn-tap:hover { background: linear-gradient(135deg, #666, #444) !important; }
+.btn-tap.active { background: linear-gradient(135deg, #007aff, #0055cc) !important; box-shadow: 0 0 8px rgba(0, 122, 255, 0.5); }
+.flash-select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--text-color);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+.flash-color-input { width: 36px; height: 26px; border-radius: 4px; cursor: pointer; }
+.flash-bpm-display {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #ffcc00;
+    min-width: 40px;
+    text-align: center;
+}
+.flash-fixtures {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.flash-fixtures label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.78rem;
+    cursor: pointer;
+    white-space: nowrap;
+}
+.flash-fixtures label input[type="checkbox"] { margin: 0; }

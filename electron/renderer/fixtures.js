@@ -78,6 +78,9 @@ const FixtureManager = (() => {
             momentaryEnabled: config.momentaryEnabled !== undefined ? config.momentaryEnabled : true,
             zoneLinks: config.zoneLinks || { l12: false, l34: false, lall: false },
             reverseWave: config.reverseWave || false,
+            flashEnabled: config.flashEnabled || false,
+            flashColorMode: config.flashColorMode || 'random',
+            flashColor: config.flashColor || '#ffffff',
             channelValues: new Uint8Array(config.channels || 3).fill(0)
         };
         if (profile && profile.controls) {
@@ -208,6 +211,27 @@ const FixtureManager = (() => {
         const fixture = fixtures.find(f => f.id === fixtureId);
         if (!fixture) return;
         fixture.reverseWave = value;
+        scheduleSave();
+    }
+
+    function setFlashEnabled(fixtureId, value) {
+        const fixture = fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+        fixture.flashEnabled = value;
+        scheduleSave();
+    }
+
+    function setFlashColorMode(fixtureId, value) {
+        const fixture = fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+        fixture.flashColorMode = value;
+        scheduleSave();
+    }
+
+    function setFlashColor(fixtureId, value) {
+        const fixture = fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+        fixture.flashColor = value;
         scheduleSave();
     }
 
@@ -494,6 +518,9 @@ const FixtureManager = (() => {
                 color: f.color,
                 waveEnabled: f.waveEnabled,
                 reverseWave: f.reverseWave || false,
+                flashEnabled: f.flashEnabled || false,
+                flashColorMode: f.flashColorMode || 'random',
+                flashColor: f.flashColor || '#ffffff',
                 momentaryEnabled: f.momentaryEnabled !== undefined ? f.momentaryEnabled : true,
                 zoneLinks: f.zoneLinks || { l12: false, l34: false, lall: false },
                 channelValues: Array.from(f.channelValues)
@@ -587,6 +614,7 @@ const FixtureManager = (() => {
         getProfiles, getProfile,
         setChannelValue, setChannelValuesBulk, getDMXChannels,
         setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setReverseWave, setMomentaryEnabled, setZoneLink, getZoneLinks,
+        setFlashEnabled, setFlashColorMode, setFlashColor,
         getNextAvailableChannel, isChannelRangeFree,
         addGroup, removeGroup, renameGroup, setGroupFixtures,
         addFixtureToGroup, removeFixtureFromGroup, setGroupColor,
