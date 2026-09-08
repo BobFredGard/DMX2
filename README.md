@@ -96,9 +96,13 @@ Système de flash rythmique par fixture, synchronisé au tempo :
 
 ## Performance DMX
 
-- Baud rate : 921600 (8× plus rapide que 115200)
+- Baud rate : 921600 (250kbaud bus DMX, 921600 série USB)
 - Paquets optimisés : envoi uniquement des canaux actifs (trim des zeros)
+  - 36 canaux (2 Starvilles) → paquet de 41 octets → ~0.4ms de transmission
+  - 14 canaux (1 Starville) → paquet de 19 octets → ~0.2ms
 - Envoi à chaque frame (~60fps) sans frame skipping
+- Throttle série : 2ms minimum entre envois
+- DMX frame time : ~1.6ms pour 36 canaux (~22ms pour 512)
 - Buffer ESP32 : 2048 octets
 
 ## Profils de fixtures
