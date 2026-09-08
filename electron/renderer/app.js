@@ -598,10 +598,6 @@ function renderFixtureCard(fixture, targetContainer) {
             <input type="checkbox" class="fixture-momentary-cb" data-id="${fixture.id}" ${fixture.momentaryEnabled !== false ? 'checked' : ''}>
             <span class="fixture-wave-label">Inst.</span>
         </label>
-        <label class="fixture-wave-toggle" title="Réagit aux flashs">
-            <input type="checkbox" class="fixture-flash-cb" data-id="${fixture.id}" ${fixture.flashEnabled ? 'checked' : ''}>
-            <span class="fixture-wave-label">Flash</span>
-        </label>
         <button class="btn-remove-fixture" data-id="${fixture.id}" title="Supprimer">&times;</button>
     `;
     card.appendChild(header);
@@ -646,12 +642,6 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-wave-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setWaveEnabled(fixture.id, e.target.checked);
-        if (e.target.checked) {
-            FixtureManager.setFlashEnabled(fixture.id, false);
-            const flashCb = card.querySelector('.fixture-flash-cb');
-            if (flashCb) flashCb.checked = false;
-            updateFlashFixturesList();
-        }
     });
     const reverseCbEl = header.querySelector('.fixture-reverse-cb');
     if (profile && profile.hasZonePickers) {
@@ -664,15 +654,6 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-momentary-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setMomentaryEnabled(fixture.id, e.target.checked);
-    });
-    header.querySelector('.fixture-flash-cb').addEventListener('change', (e) => {
-        e.stopPropagation();
-        FixtureManager.setFlashEnabled(fixture.id, e.target.checked);
-        if (e.target.checked) {
-            const waveCb = header.querySelector('.fixture-wave-cb');
-            if (waveCb && waveCb.checked) { waveCb.checked = false; FixtureManager.setWaveEnabled(fixture.id, false); }
-        }
-        updateFlashFixturesList();
     });
 
     // Zone pickers for Starvilles (in card)
@@ -1830,6 +1811,10 @@ function restoreSceneState(scene) {
         document.getElementById('waveColorEnabled').checked = scene.waveColorEnabled;
         document.getElementById('waveColorGroup').style.display = scene.waveColorEnabled ? '' : 'none';
     }
+    if (scene.flashEnabledGeneral !== undefined) {
+        document.getElementById('flashEnabled').checked = scene.flashEnabledGeneral;
+        document.getElementById('flashToolbar').style.display = scene.flashEnabledGeneral ? '' : 'none';
+    }
     if (scene.waveRunning !== undefined) pendingWaveState = scene.waveRunning;
 
     if (scene.flashTrigger !== undefined) document.getElementById('flashTrigger').value = scene.flashTrigger;
@@ -1903,6 +1888,7 @@ function captureSceneData() {
         waveColorStart: document.getElementById('waveColorStart').value,
         waveColorEnd: document.getElementById('waveColorEnd').value,
         waveColorEnabled: document.getElementById('waveColorEnabled').checked,
+        flashEnabledGeneral: document.getElementById('flashEnabled').checked,
         flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
@@ -2916,6 +2902,8 @@ function setupFlash() {
     const flashMode = document.getElementById('flashMode');
     const flashReverse = document.getElementById('flashReverse');
     const flashReverseGroup = document.getElementById('flashReverseGroup');
+    const flashEnabledCb = document.getElementById('flashEnabled');
+    const flashToolbar = document.getElementById('flashToolbar');
 
     btnTap.addEventListener('click', () => {
         btnTap.classList.add('active');
@@ -2935,16 +2923,21 @@ function setupFlash() {
     });
     flashReverse.addEventListener('change', restartFlashEngine);
 
+    flashEnabledCb.addEventListener('change', () => {
+        flashToolbar.style.display = flashEnabledCb.checked ? '' : 'none';
+        if (!flashEnabledCb.checked && flashIntervalId) stopFlashEngine();
+    });
+
     FixtureManager.onChange(() => updateFlashFixturesList());
     updateFlashFixturesList();
 }
 
 function updateFlashFixturesList() {
     const container = document.getElementById('flashFixturesList');
-    const toolbar = document.getElementById('flashToolbar');
+    const flashEnabledCb = document.getElementById('flashEnabled');
+    const flashToolbar = document.getElementById('flashToolbar');
     if (!container) return;
-    const flashCount = FixtureManager.getFixtures().filter(f => f.flashEnabled).length;
-    toolbar.style.display = flashCount > 0 ? '' : 'none';
+    flashToolbar.style.display = flashEnabledCb && flashEnabledCb.checked ? '' : 'none';
     container.innerHTML = '';
     FixtureManager.getFixtures().forEach(f => {
         const label = document.createElement('label');
@@ -3227,6 +3220,7 @@ function getCurrentSetData() {
         waveRunning: waveRunning,
         waveSpeed: parseInt(document.getElementById('waveSpeed').value) || 64,
         waveSpeedX2: document.getElementById('waveSpeedX2').checked,
+        flashEnabledGeneral: document.getElementById('flashEnabled').checked,
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
         flashColorMode: document.getElementById('flashColorMode').value,
@@ -3371,6 +3365,10 @@ function loadSetData(setData) {
     }
     if (setData.waveSpeedX2 !== undefined) {
         document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
+    }
+    if (setData.flashEnabledGeneral !== undefined) {
+        document.getElementById('flashEnabled').checked = setData.flashEnabledGeneral;
+        document.getElementById('flashToolbar').style.display = setData.flashEnabledGeneral ? '' : 'none';
     }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
@@ -3568,6 +3566,10 @@ function liveLoadSong(index) {
     }
     if (setData.waveSpeedX2 !== undefined) {
         document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
+    }
+    if (setData.flashEnabledGeneral !== undefined) {
+        document.getElementById('flashEnabled').checked = setData.flashEnabledGeneral;
+        document.getElementById('flashToolbar').style.display = setData.flashEnabledGeneral ? '' : 'none';
     }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
