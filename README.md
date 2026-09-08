@@ -1,4 +1,4 @@
-# DMX Control
+# LumiDMX
 
 Application de pilotage DMX avec ESP32, interface graphique Electron et fixtures dynamiques.
 
@@ -58,24 +58,41 @@ pio run --target upload
 - Dimmer (1ch)
 - Spot RGB (3ch)
 - Spot RGBW (4ch)
+- Starville 4 Zones (14ch)
 - Strobe (2ch)
 - Lyre 8ch
 - Lyre 12ch
 - Wash 6ch
-
-Possibilité d'ajouter des fixtures personnalisées avec un nombre de canaux libre.
+- Profils personnalisés (nombre de canaux libre)
 
 ## Fonctionnalités
 
 - Ajout/suppression de fixtures à la volée
-- Coloris picker par fixture
-- Contrôle groupe (couleur, intensité, flash)
-- Scènes (Ctrl+Click save, Click recall, Shift+Click delete)
-- Playlist par chanson
-- Animation vague
+- Coloris picker par fixture (zones et single-color)
+- Scènes avec transition (Ctrl+Click save, Click recall, Shift+Click delete)
+- Playlist par chanson (sidebar)
+- Animation vague avec vitesse variable et multiplicateur x2
+- Étoiles (flash aléatoire)
+- Spot linking (lier les couleurs entre spots)
+- Zone linking (lier les zones entre elles)
+- Contrôle MIDI
 - Momentanés
 - Import/Export JSON
-- Communication série USB directe (115200 baud)
+- Auto-reconnection au dernier port série
+- Communication série USB (460800 baud)
+
+## Performance DMX
+
+- Baud rate : 460800 (4× plus rapide que 115200)
+- Paquets optimisés : envoi uniquement des canaux actifs (trim des zeros)
+- Envoi à chaque frame (~60fps) sans frame skipping
+- Buffer ESP32 : 2048 octets
+
+## Profils de fixtures
+
+- Zones Starville inversées (Z1→offsets 9-11, Z4→offsets 0-2)
+- Dimmer réglable dans les scènes (valeur sauvegardée, pas forcé à 255)
+- Sliders synchronisés avec les coloris pickers
 
 ## Protocole série
 
