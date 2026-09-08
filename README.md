@@ -49,7 +49,7 @@ pio run --target upload
 |----------|--------|
 | GPIO 16  | RO     |
 | GPIO 17  | DI     |
-| GPIO 4   | DE/RE  |
+| GPIO 21  | DE/RE  |
 | GND      | GND    |
 | 5V/3.3V  | VCC    |
 
