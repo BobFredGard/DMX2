@@ -197,7 +197,37 @@
     <!-- Flash Toolbar -->
     <div class="group-toolbar flash-toolbar" id="flashToolbar" style="display:none;">
         <div class="group-toolbar-item">
-            <button id="btnFlash" class="btn btn-sm btn-flash">Flash</button>
+            <button id="btnTapTempo" class="btn btn-sm btn-tap">Tap</button>
+        </div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label">BPM</label>
+            <span id="flashBPM" class="flash-bpm-display">---</span>
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label">Déclencher</label>
+            <select id="flashTrigger" class="flash-select">
+                <option value="4">Ronde</option>
+                <option value="2">Blanche</option>
+                <option value="1" selected>Noire</option>
+                <option value="0.5">Croche</option>
+                <option value="0.25">Double-croche</option>
+                <option value="0.125">Triple-croche</option>
+                <option value="0.0625">Quadruple-croche</option>
+            </select>
+        </div>
+        <div class="group-toolbar-separator"></div>
+        <div class="group-toolbar-item">
+            <label class="group-toolbar-label">Durée</label>
+            <select id="flashDuration" class="flash-select">
+                <option value="4">Ronde</option>
+                <option value="2">Blanche</option>
+                <option value="1">Noire</option>
+                <option value="0.5" selected>Croche</option>
+                <option value="0.25">Double-croche</option>
+                <option value="0.125">Triple-croche</option>
+                <option value="0.0625">Quadruple-croche</option>
+            </select>
         </div>
         <div class="group-toolbar-separator"></div>
         <div class="group-toolbar-item">
@@ -209,28 +239,6 @@
         </div>
         <div class="group-toolbar-item" id="flashColorGroup" style="display:none;">
             <input type="text" id="flashColor" class="coloris flash-color-input" value="#ffffff" data-coloris>
-        </div>
-        <div class="group-toolbar-separator"></div>
-        <div class="group-toolbar-item">
-            <label class="group-toolbar-label">Durée</label>
-            <select id="flashDuration" class="flash-select">
-                <option value="50">50ms</option>
-                <option value="100">100ms</option>
-                <option value="150">150ms</option>
-                <option value="200" selected>200ms</option>
-                <option value="300">300ms</option>
-                <option value="500">500ms</option>
-                <option value="800">800ms</option>
-                <option value="1000">1s</option>
-            </select>
-        </div>
-        <div class="group-toolbar-separator"></div>
-        <div class="group-toolbar-item">
-            <button id="btnTapTempo" class="btn btn-sm btn-tap">Tap</button>
-        </div>
-        <div class="group-toolbar-item">
-            <label class="group-toolbar-label">BPM</label>
-            <span id="flashBPM" class="flash-bpm-display">---</span>
         </div>
         <div class="group-toolbar-separator"></div>
         <div class="group-toolbar-item flash-fixtures" id="flashFixturesList">

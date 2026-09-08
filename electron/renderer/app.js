@@ -20,6 +20,8 @@ let flashStartTime = 0;
 let flashTapTimes = [];
 let flashBPM = null;
 let flashMidiCC = 119;
+let flashIntervalId = null;
+let flashActiveFixtures = new Set();
 let playlist = [];
 let currentSongIndex = -1;
 let lastSendTime = 0;
@@ -214,11 +216,33 @@ function setupSerialUI() {
     window.serial.onData((data) => {
         const line = data.toString().trim();
         if (line === 'FLASH') {
-            triggerFlash();
+            const activeIds = [...flashActiveFixtures];
+            if (activeIds.length > 0) flashTick();
         } else if (line.startsWith('FLASH #')) {
             const hex = line.substring(7).trim();
             const rgb = hexToRgb(hex);
-            if (rgb) triggerFlash(rgb);
+            if (rgb) {
+                const activeIds = [...flashActiveFixtures];
+                activeIds.forEach(id => {
+                    const fixture = FixtureManager.getFixture(id);
+                    if (!fixture) return;
+                    if (!fixture._flashPreState) fixture._flashPreState = new Uint8Array(fixture.channelValues);
+                    const profile = FixtureManager.getProfile(fixture.profileId);
+                    const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
+                    if (zoneCount > 1) {
+                        for (let z = 0; z < zoneCount; z++) {
+                            const off = (zoneCount - 1 - z) * 3;
+                            FixtureManager.setChannelValue(fixture.id, off, rgb.r);
+                            FixtureManager.setChannelValue(fixture.id, off + 1, rgb.g);
+                            FixtureManager.setChannelValue(fixture.id, off + 2, rgb.b);
+                        }
+                    } else if (FixtureManager.isRGBFixture(fixture)) {
+                        FixtureManager.setFixtureColor(fixture.id, rgb.r, rgb.g, rgb.b);
+                    }
+                });
+                sendDMXBuffer();
+                updateAllFixtureDisplays();
+            }
         }
     });
 }
@@ -2571,49 +2595,18 @@ function runWave() {
 // FLASH
 // ============================================
 
-function triggerFlash(customColor) {
-    if (flashRunning) return;
+function flashOnFixture(fixtureId) {
+    const fixture = FixtureManager.getFixture(fixtureId);
+    if (!fixture) return;
 
-    const flashFixtures = FixtureManager.getFixtures().filter(f => f.flashEnabled);
-    if (flashFixtures.length === 0) return;
-
-    if (waveRunning) toggleWave();
-
-    flashPreState = flashFixtures.map(f => ({
-        id: f.id,
-        channelValues: new Uint8Array(f.channelValues)
-    }));
-
-    const duration = parseInt(document.getElementById('flashDuration').value) || 200;
     const colorMode = document.getElementById('flashColorMode').value;
+    const profile = FixtureManager.getProfile(fixture.profileId);
+    const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
 
-    flashFixtures.forEach(fixture => {
-        const profile = FixtureManager.getProfile(fixture.profileId);
-        const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
-
-        if (zoneCount > 1) {
-            for (let z = 0; z < zoneCount; z++) {
-                let r, g, b;
-                if (customColor) {
-                    r = customColor.r; g = customColor.g; b = customColor.b;
-                } else if (colorMode === 'specific') {
-                    const rgb = hexToRgb(fixture.flashColor || '#ffffff');
-                    r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
-                } else {
-                    r = Math.floor(Math.random() * 256);
-                    g = Math.floor(Math.random() * 256);
-                    b = Math.floor(Math.random() * 256);
-                }
-                const off = (zoneCount - 1 - z) * 3;
-                FixtureManager.setChannelValue(fixture.id, off, r);
-                FixtureManager.setChannelValue(fixture.id, off + 1, g);
-                FixtureManager.setChannelValue(fixture.id, off + 2, b);
-            }
-        } else if (FixtureManager.isRGBFixture(fixture)) {
+    if (zoneCount > 1) {
+        for (let z = 0; z < zoneCount; z++) {
             let r, g, b;
-            if (customColor) {
-                r = customColor.r; g = customColor.g; b = customColor.b;
-            } else if (colorMode === 'specific') {
+            if (colorMode === 'specific') {
                 const rgb = hexToRgb(fixture.flashColor || '#ffffff');
                 r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
             } else {
@@ -2621,62 +2614,98 @@ function triggerFlash(customColor) {
                 g = Math.floor(Math.random() * 256);
                 b = Math.floor(Math.random() * 256);
             }
-            FixtureManager.setFixtureColor(fixture.id, r, g, b);
+            const off = (zoneCount - 1 - z) * 3;
+            FixtureManager.setChannelValue(fixture.id, off, r);
+            FixtureManager.setChannelValue(fixture.id, off + 1, g);
+            FixtureManager.setChannelValue(fixture.id, off + 2, b);
         }
-    });
-
-    sendDMXBuffer();
-    updateAllFixtureDisplays();
-
-    flashRunning = true;
-    flashStartTime = performance.now();
-    flashReqId = requestAnimationFrame(runFlash);
+    } else if (FixtureManager.isRGBFixture(fixture)) {
+        let r, g, b;
+        if (colorMode === 'specific') {
+            const rgb = hexToRgb(fixture.flashColor || '#ffffff');
+            r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
+        } else {
+            r = Math.floor(Math.random() * 256);
+            g = Math.floor(Math.random() * 256);
+            b = Math.floor(Math.random() * 256);
+        }
+        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+    }
 }
 
-function runFlash(now) {
-    const duration = parseInt(document.getElementById('flashDuration').value) || 200;
-    const elapsed = now - flashStartTime;
-    const progress = Math.min(elapsed / duration, 1);
+function flashOffFixture(fixtureId) {
+    const fixture = FixtureManager.getFixture(fixtureId);
+    if (!fixture || !fixture._flashPreState) return;
+    fixture._flashPreState.forEach((val, idx) => fixture.channelValues[idx] = val);
+    fixture._flashPreState = null;
+}
 
-    if (progress >= 1) {
-        if (flashPreState) {
-            flashPreState.forEach(sf => {
-                const fixture = FixtureManager.getFixture(sf.id);
-                if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
-            });
-            flashPreState = null;
+function flashTick() {
+    const activeIds = [...flashActiveFixtures];
+    if (activeIds.length === 0) { stopFlashEngine(); return; }
+
+    const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
+    const bpm = flashBPM || 120;
+    const durationMs = (durationBeats / bpm) * 60000;
+
+    activeIds.forEach(id => {
+        const fixture = FixtureManager.getFixture(id);
+        if (!fixture) return;
+        if (!fixture._flashPreState) {
+            fixture._flashPreState = new Uint8Array(fixture.channelValues);
         }
-        flashRunning = false;
-        flashReqId = null;
+        flashOnFixture(id);
         sendDMXBuffer();
         updateAllFixtureDisplays();
-        return;
-    }
+        setTimeout(() => {
+            flashOffFixture(id);
+            sendDMXBuffer();
+            updateAllFixtureDisplays();
+        }, durationMs);
+    });
+}
 
-    if (flashPreState) {
-        const ease = 1 - Math.pow(1 - progress, 2);
-        flashPreState.forEach(sf => {
-            const fixture = FixtureManager.getFixture(sf.id);
-            if (!fixture) return;
-            const profile = FixtureManager.getProfile(fixture.profileId);
-            const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
-            for (let i = 0; i < sf.channelValues.length && i < fixture.channels; i++) {
-                fixture.channelValues[i] = Math.round(sf.channelValues[i] + (sf.channelValues[i] - sf.channelValues[i]) * ease);
-            }
-        });
+function startFlashEngine() {
+    if (flashIntervalId) return;
+    const bpm = flashBPM || 120;
+    const triggerBeats = parseFloat(document.getElementById('flashTrigger').value) || 1;
+    const intervalMs = (triggerBeats / bpm) * 60000;
+    flashTick();
+    flashIntervalId = setInterval(flashTick, intervalMs);
+}
+
+function stopFlashEngine() {
+    if (flashIntervalId) { clearInterval(flashIntervalId); flashIntervalId = null; }
+    flashActiveFixtures.forEach(id => flashOffFixture(id));
+    flashActiveFixtures.clear();
+    sendDMXBuffer();
+    updateAllFixtureDisplays();
+}
+
+function restartFlashEngine() {
+    stopFlashEngine();
+    if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+}
+
+function toggleFlashFixture(fixtureId, enabled) {
+    if (enabled) {
+        if (waveRunning) toggleWave();
+        flashActiveFixtures.add(fixtureId);
+        if (!flashIntervalId && flashBPM) startFlashEngine();
+        else { flashTick(); }
+    } else {
+        flashOffFixture(fixtureId);
+        flashActiveFixtures.delete(fixtureId);
         sendDMXBuffer();
         updateAllFixtureDisplays();
+        if (flashActiveFixtures.size === 0) stopFlashEngine();
     }
-
-    flashReqId = requestAnimationFrame(runFlash);
 }
 
 function handleTapTempo() {
     const now = performance.now();
     flashTapTimes.push(now);
-
     if (flashTapTimes.length > 8) flashTapTimes.shift();
-
     if (flashTapTimes.length >= 2) {
         const intervals = [];
         for (let i = 1; i < flashTapTimes.length; i++) {
@@ -2687,24 +2716,19 @@ function handleTapTempo() {
         flashBPM = Math.max(30, Math.min(300, flashBPM));
         document.getElementById('flashBPM').textContent = flashBPM;
     }
-
     if (flashTapTimes.length >= 2) {
         const lastInterval = flashTapTimes[flashTapTimes.length - 1] - flashTapTimes[flashTapTimes.length - 2];
-        if (lastInterval > 2000) {
-            flashTapTimes = [now];
-        }
+        if (lastInterval > 2000) flashTapTimes = [now];
     }
-
-    triggerFlash();
+    restartFlashEngine();
 }
 
 function setupFlash() {
-    const btnFlash = document.getElementById('btnFlash');
     const btnTap = document.getElementById('btnTapTempo');
     const colorMode = document.getElementById('flashColorMode');
     const colorGroup = document.getElementById('flashColorGroup');
-
-    btnFlash.addEventListener('click', () => triggerFlash());
+    const triggerSel = document.getElementById('flashTrigger');
+    const durationSel = document.getElementById('flashDuration');
 
     btnTap.addEventListener('click', () => {
         btnTap.classList.add('active');
@@ -2716,9 +2740,8 @@ function setupFlash() {
         colorGroup.style.display = colorMode.value === 'specific' ? '' : 'none';
     });
 
-    document.getElementById('flashColor').addEventListener('input', (e) => {
-        // color picker updates live, no action needed
-    });
+    triggerSel.addEventListener('change', restartFlashEngine);
+    durationSel.addEventListener('change', restartFlashEngine);
 
     FixtureManager.onChange(() => updateFlashFixturesList());
     updateFlashFixturesList();
@@ -2735,10 +2758,10 @@ function updateFlashFixturesList() {
         const label = document.createElement('label');
         const cb = document.createElement('input');
         cb.type = 'checkbox';
-        cb.checked = f.flashEnabled || false;
+        cb.checked = flashActiveFixtures.has(f.id);
         cb.addEventListener('change', () => {
             FixtureManager.setFlashEnabled(f.id, cb.checked);
-            updateFlashFixturesList();
+            toggleFlashFixture(f.id, cb.checked);
         });
         label.appendChild(cb);
         label.appendChild(document.createTextNode(f.name));
@@ -2747,7 +2770,9 @@ function updateFlashFixturesList() {
 }
 
 function triggerFlashFromMIDI() {
-    triggerFlash();
+    const activeIds = [...flashActiveFixtures];
+    if (activeIds.length === 0) return;
+    flashTick();
 }
 
 function hexToRgb(hex) {
