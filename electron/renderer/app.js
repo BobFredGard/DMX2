@@ -598,6 +598,10 @@ function renderFixtureCard(fixture, targetContainer) {
             <input type="checkbox" class="fixture-momentary-cb" data-id="${fixture.id}" ${fixture.momentaryEnabled !== false ? 'checked' : ''}>
             <span class="fixture-wave-label">Inst.</span>
         </label>
+        <label class="fixture-wave-toggle" title="Réagit aux flashs">
+            <input type="checkbox" class="fixture-flash-cb" data-id="${fixture.id}" ${fixture.flashEnabled ? 'checked' : ''}>
+            <span class="fixture-wave-label">Flash</span>
+        </label>
         <button class="btn-remove-fixture" data-id="${fixture.id}" title="Supprimer">&times;</button>
     `;
     card.appendChild(header);
@@ -660,6 +664,15 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-momentary-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setMomentaryEnabled(fixture.id, e.target.checked);
+    });
+    header.querySelector('.fixture-flash-cb').addEventListener('change', (e) => {
+        e.stopPropagation();
+        FixtureManager.setFlashEnabled(fixture.id, e.target.checked);
+        if (e.target.checked) {
+            const waveCb = header.querySelector('.fixture-wave-cb');
+            if (waveCb && waveCb.checked) { waveCb.checked = false; FixtureManager.setWaveEnabled(fixture.id, false); }
+        }
+        updateFlashFixturesList();
     });
 
     // Zone pickers for Starvilles (in card)
@@ -739,30 +752,6 @@ function renderFixtureCard(fixture, targetContainer) {
             setTimeout(() => reinitColorisInstance('#fixtureZone-' + fixture.id + '-z' + z), 50 + z * 20);
         }
         card.appendChild(zonesContainer);
-
-        const flashToggle = document.createElement('label');
-        flashToggle.className = 'fixture-wave-toggle fixture-flash-toggle';
-        flashToggle.title = 'Réagit aux flashs';
-        const flashCb = document.createElement('input');
-        flashCb.type = 'checkbox';
-        flashCb.className = 'fixture-flash-cb';
-        flashCb.dataset.id = fixture.id;
-        flashCb.checked = fixture.flashEnabled || false;
-        const flashSpan = document.createElement('span');
-        flashSpan.className = 'fixture-wave-label';
-        flashSpan.textContent = 'Flash';
-        flashToggle.appendChild(flashCb);
-        flashToggle.appendChild(flashSpan);
-        card.appendChild(flashToggle);
-
-        flashCb.addEventListener('change', () => {
-            FixtureManager.setFlashEnabled(fixture.id, flashCb.checked);
-            if (flashCb.checked) {
-                const waveCb = header.querySelector('.fixture-wave-cb');
-                if (waveCb && waveCb.checked) { waveCb.checked = false; FixtureManager.setWaveEnabled(fixture.id, false); }
-            }
-            updateFlashFixturesList();
-        });
     }
 
     // Single color picker (in card)
@@ -787,30 +776,6 @@ function renderFixtureCard(fixture, targetContainer) {
             }
         });
         setTimeout(() => reinitColorisInstance('.fixture-color-' + fixture.id), 50);
-
-        const flashToggle = document.createElement('label');
-        flashToggle.className = 'fixture-wave-toggle fixture-flash-toggle';
-        flashToggle.title = 'Réagit aux flashs';
-        const flashCb = document.createElement('input');
-        flashCb.type = 'checkbox';
-        flashCb.className = 'fixture-flash-cb';
-        flashCb.dataset.id = fixture.id;
-        flashCb.checked = fixture.flashEnabled || false;
-        const flashSpan = document.createElement('span');
-        flashSpan.className = 'fixture-wave-label';
-        flashSpan.textContent = 'Flash';
-        flashToggle.appendChild(flashCb);
-        flashToggle.appendChild(flashSpan);
-        card.appendChild(flashToggle);
-
-        flashCb.addEventListener('change', () => {
-            FixtureManager.setFlashEnabled(fixture.id, flashCb.checked);
-            if (flashCb.checked) {
-                const waveCb = header.querySelector('.fixture-wave-cb');
-                if (waveCb && waveCb.checked) { waveCb.checked = false; FixtureManager.setWaveEnabled(fixture.id, false); }
-            }
-            updateFlashFixturesList();
-        });
     }
 
     // Right-click opens slider panel
