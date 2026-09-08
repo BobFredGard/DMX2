@@ -79,11 +79,24 @@ pio run --target upload
 - Momentanés
 - Import/Export JSON
 - Auto-reconnection au dernier port série
-- Communication série USB (460800 baud)
+
+### Flash musical
+
+Système de flash rythmique par fixture, synchronisé au tempo :
+
+- **Toggle par fixture** : checkbox "Flash" dans la card = ON/OFF
+- **Tap Tempo** : bouton Tap calcule le BPM
+- **Subdivisions musicales** : Ronde, Blanche, Noire, Croche, Double-croche, Triple-croche, Quadruple-croche
+  - **Déclencher** : à quelle vitesse le flash se déclenche
+  - **Durée** : combien de temps le flash reste actif
+- **Couleur** : aléatoire ou choisie par fixture
+- **MIDI CC 119** : déclenche un flash ponctuel
+- **Commande série** : `FLASH` ou `FLASH #RRGGBB` depuis une app tierce
+- **Scènes** : chaque scène enregistre l'état flash (fixtures actives, BPM, subdivisions, couleur)
 
 ## Performance DMX
 
-- Baud rate : 460800 (4× plus rapide que 115200)
+- Baud rate : 921600 (8× plus rapide que 115200)
 - Paquets optimisés : envoi uniquement des canaux actifs (trim des zeros)
 - Envoi à chaque frame (~60fps) sans frame skipping
 - Buffer ESP32 : 2048 octets
@@ -93,6 +106,7 @@ pio run --target upload
 - Zones Starville inversées (Z1→offsets 9-11, Z4→offsets 0-2)
 - Dimmer réglable dans les scènes (valeur sauvegardée, pas forcé à 255)
 - Sliders synchronisés avec les coloris pickers
+- Vague inversée par fixture (Starvilles)
 
 ## Protocole série
 
@@ -102,3 +116,7 @@ PC → ESP32:
 
 ESP32 → PC:
 - `[0xFE][STATUS]` (0x00=OK, 0x01=ERROR, 0x02=CONNECTED)
+
+Commandes reçues (depuis app tierce via WiFi/BT → ESP32 → série):
+- `FLASH` → déclenche un flash sur fixtures actives
+- `FLASH #RRGGBB` → flash avec couleur spécifique

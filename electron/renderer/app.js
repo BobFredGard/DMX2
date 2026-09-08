@@ -590,6 +590,10 @@ function renderFixtureCard(fixture, targetContainer) {
             <input type="checkbox" class="fixture-wave-cb" data-id="${fixture.id}" ${fixture.waveEnabled ? 'checked' : ''}>
             <span class="fixture-wave-label">Vague</span>
         </label>
+        <label class="fixture-wave-toggle" title="Inverser le sens de la vague" style="display:none;">
+            <input type="checkbox" class="fixture-reverse-cb" data-id="${fixture.id}" ${fixture.reverseWave ? 'checked' : ''}>
+            <span class="fixture-wave-label">Inversion</span>
+        </label>
         <label class="fixture-wave-toggle" title="Réagit aux instantanés">
             <input type="checkbox" class="fixture-momentary-cb" data-id="${fixture.id}" ${fixture.momentaryEnabled !== false ? 'checked' : ''}>
             <span class="fixture-wave-label">Inst.</span>
@@ -623,6 +627,14 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-wave-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setWaveEnabled(fixture.id, e.target.checked);
+    });
+    const reverseCbEl = header.querySelector('.fixture-reverse-cb');
+    if (profile && profile.hasZonePickers) {
+        reverseCbEl.closest('label').style.display = '';
+    }
+    reverseCbEl.addEventListener('change', (e) => {
+        e.stopPropagation();
+        FixtureManager.setReverseWave(fixture.id, e.target.checked);
     });
     header.querySelector('.fixture-momentary-cb').addEventListener('change', (e) => {
         e.stopPropagation();
@@ -711,22 +723,6 @@ function renderFixtureCard(fixture, targetContainer) {
             setTimeout(() => reinitColorisInstance('#fixtureZone-' + fixture.id + '-z' + z), 50 + z * 20);
         }
         card.appendChild(zonesContainer);
-
-        const reverseDiv = document.createElement('div');
-        reverseDiv.className = 'fixture-zone-reverse';
-        const reverseCb = document.createElement('input');
-        reverseCb.type = 'checkbox';
-        reverseCb.checked = fixture.reverseWave || false;
-        reverseCb.title = 'Inverser le sens de la vague (droite à gauche)';
-        const reverseLabel = document.createElement('label');
-        reverseLabel.className = 'slider-label';
-        reverseLabel.textContent = 'Vague inversée';
-        reverseLabel.prepend(reverseCb);
-        reverseDiv.appendChild(reverseLabel);
-        card.appendChild(reverseDiv);
-        reverseCb.addEventListener('change', (e) => {
-            FixtureManager.setReverseWave(fixture.id, e.target.checked);
-        });
     }
 
     // Single color picker (in card)
@@ -1805,6 +1801,34 @@ function restoreSceneState(scene) {
         document.getElementById('waveColorGroup').style.display = scene.waveColorEnabled ? '' : 'none';
     }
     if (scene.waveRunning !== undefined) pendingWaveState = scene.waveRunning;
+
+    if (scene.flashTrigger !== undefined) document.getElementById('flashTrigger').value = scene.flashTrigger;
+    if (scene.flashDuration !== undefined) document.getElementById('flashDuration').value = scene.flashDuration;
+    if (scene.flashColorMode !== undefined) {
+        document.getElementById('flashColorMode').value = scene.flashColorMode;
+        document.getElementById('flashColorGroup').style.display = scene.flashColorMode === 'specific' ? '' : 'none';
+    }
+    if (scene.flashBPM !== undefined) {
+        flashBPM = scene.flashBPM;
+        document.getElementById('flashBPM').textContent = flashBPM || '---';
+    }
+    if (scene.flashStates) {
+        stopFlashEngine();
+        flashActiveFixtures.clear();
+        Object.entries(scene.flashStates).forEach(([fid, active]) => {
+            const f = FixtureManager.getFixture(fid);
+            if (f) {
+                f.flashEnabled = active;
+                if (active) flashActiveFixtures.add(fid);
+            }
+        });
+        updateFlashFixturesList();
+        document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
+            const fid = cb.dataset.id;
+            if (fid && scene.flashStates[fid] !== undefined) cb.checked = scene.flashStates[fid];
+        });
+        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+    }
 }
 
 function restoreSceneChannels(scene) {
@@ -1843,6 +1867,11 @@ function captureSceneData() {
         waveColorStart: document.getElementById('waveColorStart').value,
         waveColorEnd: document.getElementById('waveColorEnd').value,
         waveColorEnabled: document.getElementById('waveColorEnabled').checked,
+        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
+        flashTrigger: document.getElementById('flashTrigger').value,
+        flashDuration: document.getElementById('flashDuration').value,
+        flashColorMode: document.getElementById('flashColorMode').value,
+        flashBPM: flashBPM,
         fixtureChannels: FixtureManager.getFixtures().reduce((acc, f) => {
             acc[f.id] = Array.from(f.channelValues);
             return acc;
@@ -2225,6 +2254,7 @@ function handleMIDIMessage(msg) {
 function startSceneFade(targetValues, duration) {
     if (fadeReqId) cancelAnimationFrame(fadeReqId);
     if (waveRunning) toggleWave();
+    stopFlashEngine();
 
     if (duration === 0) {
         applySceneValues(targetValues);
@@ -3033,6 +3063,11 @@ function getCurrentSetData() {
         spotLinks: {},
         groupColors: {},
         waveRunning: waveRunning,
+        flashTrigger: document.getElementById('flashTrigger').value,
+        flashDuration: document.getElementById('flashDuration').value,
+        flashColorMode: document.getElementById('flashColorMode').value,
+        flashBPM: flashBPM,
+        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
         timestamp: Date.now()
     };
 
@@ -3184,6 +3219,31 @@ function loadSetData(setData) {
     if (setData.waveColorEnabled !== undefined) {
         document.getElementById('waveColorEnabled').checked = setData.waveColorEnabled;
         document.getElementById('waveColorGroup').style.display = setData.waveColorEnabled ? '' : 'none';
+    }
+
+    if (setData.flashTrigger !== undefined) document.getElementById('flashTrigger').value = setData.flashTrigger;
+    if (setData.flashDuration !== undefined) document.getElementById('flashDuration').value = setData.flashDuration;
+    if (setData.flashColorMode !== undefined) {
+        document.getElementById('flashColorMode').value = setData.flashColorMode;
+        document.getElementById('flashColorGroup').style.display = setData.flashColorMode === 'specific' ? '' : 'none';
+    }
+    if (setData.flashBPM !== undefined) {
+        flashBPM = setData.flashBPM;
+        document.getElementById('flashBPM').textContent = flashBPM || '---';
+    }
+    if (setData.flashStates) {
+        stopFlashEngine();
+        flashActiveFixtures.clear();
+        Object.entries(setData.flashStates).forEach(([fid, active]) => {
+            const f = FixtureManager.getFixture(fid);
+            if (f) { f.flashEnabled = active; if (active) flashActiveFixtures.add(fid); }
+        });
+        updateFlashFixturesList();
+        document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
+            const fid = cb.dataset.id;
+            if (fid && setData.flashStates[fid] !== undefined) cb.checked = setData.flashStates[fid];
+        });
+        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
     }
 
     renderAllFixtures();
