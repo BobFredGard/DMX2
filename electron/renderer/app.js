@@ -624,6 +624,25 @@ function renderFixtureCard(fixture, targetContainer) {
             sendDMXBuffer();
         }
     });
+    header.querySelector('h3').addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const h3 = e.target;
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.value = fixture.name;
+        input.className = 'fixture-rename-input';
+        input.style.cssText = 'background:var(--input-bg);border:1px solid var(--accent-blue);color:var(--text-color);border-radius:4px;padding:2px 6px;font-size:0.9rem;font-weight:600;width:120px;outline:none;';
+        h3.replaceWith(input);
+        input.focus();
+        input.select();
+        const commit = () => {
+            const newName = input.value.trim() || fixture.name;
+            FixtureManager.renameFixture(fixture.id, newName);
+            renderAllFixtures();
+        };
+        input.addEventListener('blur', commit);
+        input.addEventListener('keydown', (ev) => { if (ev.key === 'Enter') input.blur(); if (ev.key === 'Escape') { input.value = fixture.name; input.blur(); } });
+    });
     header.querySelector('.fixture-wave-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setWaveEnabled(fixture.id, e.target.checked);

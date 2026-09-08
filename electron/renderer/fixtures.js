@@ -242,6 +242,14 @@ const FixtureManager = (() => {
         scheduleSave();
     }
 
+    function renameFixture(fixtureId, newName) {
+        const fixture = fixtures.find(f => f.id === fixtureId);
+        if (!fixture) return;
+        fixture.name = newName;
+        scheduleSave();
+        notifyListeners('rename', fixture);
+    }
+
     function setZoneLink(fixtureId, link, value) {
         const fixture = fixtures.find(f => f.id === fixtureId);
         if (!fixture || !fixture.zoneLinks) return;
@@ -615,6 +623,7 @@ const FixtureManager = (() => {
         setChannelValue, setChannelValuesBulk, getDMXChannels,
         setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setReverseWave, setMomentaryEnabled, setZoneLink, getZoneLinks,
         setFlashEnabled, setFlashColorMode, setFlashColor,
+        renameFixture,
         getNextAvailableChannel, isChannelRangeFree,
         addGroup, removeGroup, renameGroup, setGroupFixtures,
         addFixtureToGroup, removeFixtureFromGroup, setGroupColor,
