@@ -2667,9 +2667,40 @@ function flashOnFixture(fixtureId) {
 
 function flashOffFixture(fixtureId) {
     const fixture = FixtureManager.getFixture(fixtureId);
-    if (!fixture || !fixture._flashPreState) return;
-    fixture._flashPreState.forEach((val, idx) => fixture.channelValues[idx] = val);
+    if (!fixture) return;
+    const profile = FixtureManager.getProfile(fixture.profileId);
+    const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
+    if (zoneCount > 1) {
+        for (let z = 0; z < zoneCount; z++) {
+            const off = (zoneCount - 1 - z) * 3;
+            FixtureManager.setChannelValue(fixture.id, off, 0);
+            FixtureManager.setChannelValue(fixture.id, off + 1, 0);
+            FixtureManager.setChannelValue(fixture.id, off + 2, 0);
+        }
+    } else if (FixtureManager.isRGBFixture(fixture)) {
+        FixtureManager.setFixtureColor(fixture.id, 0, 0, 0);
+    }
     fixture._flashPreState = null;
+}
+
+function flashFadeToBlack(fixtureId, progress) {
+    const fixture = FixtureManager.getFixture(fixtureId);
+    if (!fixture || !fixture._flashPeakColor) return;
+    const r = Math.round(fixture._flashPeakColor.r * (1 - progress));
+    const g = Math.round(fixture._flashPeakColor.g * (1 - progress));
+    const b = Math.round(fixture._flashPeakColor.b * (1 - progress));
+    const profile = FixtureManager.getProfile(fixture.profileId);
+    const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
+    if (zoneCount > 1) {
+        for (let z = 0; z < zoneCount; z++) {
+            const off = (zoneCount - 1 - z) * 3;
+            FixtureManager.setChannelValue(fixture.id, off, r);
+            FixtureManager.setChannelValue(fixture.id, off + 1, g);
+            FixtureManager.setChannelValue(fixture.id, off + 2, b);
+        }
+    } else if (FixtureManager.isRGBFixture(fixture)) {
+        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+    }
 }
 
 function flashTick() {
@@ -2679,21 +2710,40 @@ function flashTick() {
     const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
     const bpm = flashBPM || 120;
     const durationMs = (durationBeats / bpm) * 60000;
+    const halfMs = durationMs / 2;
 
     activeIds.forEach(id => {
         const fixture = FixtureManager.getFixture(id);
         if (!fixture) return;
-        if (!fixture._flashPreState) {
-            fixture._flashPreState = new Uint8Array(fixture.channelValues);
-        }
         flashOnFixture(id);
+        const profile = FixtureManager.getProfile(fixture.profileId);
+        const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
+        if (zoneCount > 1) {
+            const off = (zoneCount - 1) * 3;
+            fixture._flashPeakColor = {
+                r: fixture.channelValues[off] || 0,
+                g: fixture.channelValues[off + 1] || 0,
+                b: fixture.channelValues[off + 2] || 0
+            };
+        } else if (FixtureManager.isRGBFixture(fixture)) {
+            const rgb = FixtureManager.getFixtureRGB(fixture.id);
+            fixture._flashPeakColor = rgb ? { r: rgb.r, g: rgb.g, b: rgb.b } : { r: 255, g: 255, b: 255 };
+        }
         sendDMXBuffer();
         updateAllFixtureDisplays();
         setTimeout(() => {
-            flashOffFixture(id);
-            sendDMXBuffer();
-            updateAllFixtureDisplays();
-        }, durationMs);
+            const fadeStart = performance.now();
+            function fadeStep(now) {
+                const elapsed = now - fadeStart;
+                const progress = Math.min(elapsed / halfMs, 1);
+                flashFadeToBlack(id, progress);
+                sendDMXBuffer();
+                updateAllFixtureDisplays();
+                if (progress < 1) requestAnimationFrame(fadeStep);
+                else { fixture._flashPeakColor = null; }
+            }
+            requestAnimationFrame(fadeStep);
+        }, halfMs);
     });
 }
 
