@@ -1055,6 +1055,7 @@ select option { background: #1a1a1a; }
 }
 .scene-all {
     display: flex;
+    flex-direction: column;
     gap: 2px;
     flex: 1;
     min-width: 0;
