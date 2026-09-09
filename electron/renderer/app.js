@@ -1769,7 +1769,7 @@ function handleSceneClick(e, index, isMomentary) {
 
     const scene = scenes[index];
 
-    if (e.ctrlKey && e.shiftKey) { saveScene(index); return; }
+    if ((e.ctrlKey || e.metaKey) && e.shiftKey) { saveScene(index); return; }
     if (e.ctrlKey || e.metaKey) { saveScene(index, true); return; }
     if (e.shiftKey) { deleteScene(index); return; }
 
@@ -1868,7 +1868,8 @@ function restoreSceneState(scene) {
         });
     }
 
-    if (scene.waveRunning && !waveRunning) {
+    if (scene.waveRunning) {
+        if (waveRunning) toggleWave();
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
@@ -1878,7 +1879,8 @@ function restoreSceneState(scene) {
         syncWaveButton();
         runWave();
     }
-    if (scene.flashRunning && !isFlashToolbarVisible()) {
+    if (scene.flashRunning) {
+        if (isFlashToolbarVisible()) stopFlashEngine();
         flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
         FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => {
             const profile = FixtureManager.getProfile(f.profileId);
@@ -1968,10 +1970,13 @@ function captureMomentaryData() {
     return { values, ts: Date.now() };
 }
 
-function saveScene(index, forceWaveOff) {
+function saveScene(index, forceOff) {
     markDirty();
     const data = captureSceneData();
-    if (forceWaveOff) data.waveRunning = false;
+    if (forceOff) {
+        data.waveRunning = false;
+        data.flashRunning = false;
+    }
     const existing = scenes[index];
     data.transition = existing ? existing.transition : 2;
     scenes[index] = data;
@@ -1980,7 +1985,7 @@ function saveScene(index, forceWaveOff) {
     if (window._autoSave) window._autoSave();
     const btn = document.getElementById('scene-regular-' + index);
     if (btn) { btn.classList.add('saved'); btn.style.color = '#00ff00'; setTimeout(() => { btn.style.color = ''; }, 500); }
-    showToast('Scène ' + (index + 1) + ' sauvegardée' + (forceWaveOff ? ' [sans vague]' : ''));
+    showToast('Scène ' + (index + 1) + ' sauvegardée' + (forceOff ? ' [sans vague/flash]' : ''));
 }
 
 function saveMomentary(index) {
