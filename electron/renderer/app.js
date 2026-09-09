@@ -2894,16 +2894,20 @@ function toggleFlash() {
     }
 }
 
+function isFlashToolbarVisible() {
+    return document.getElementById('flashToolbar').style.display !== 'none';
+}
+
 function restartFlashEngine() {
     stopFlashEngine();
-    if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+    if (isFlashToolbarVisible() && flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
 }
 
 function toggleFlashFixture(fixtureId, enabled) {
     if (enabled) {
         if (waveRunning) toggleWave();
         flashActiveFixtures.add(fixtureId);
-        if (!flashIntervalId && flashBPM) startFlashEngine();
+        if (isFlashToolbarVisible() && !flashIntervalId && flashBPM) startFlashEngine();
         else { flashTick(); }
     } else {
         flashOffFixture(fixtureId);
