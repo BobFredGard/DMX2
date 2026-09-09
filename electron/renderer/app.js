@@ -419,8 +419,9 @@ function syncWaveButton() {
 
 function syncFlashButton() {
     const btn = document.getElementById('btnFlash');
+    const toolbar = document.getElementById('flashToolbar');
     if (!btn) return;
-    const running = flashActiveFixtures.size > 0 && flashIntervalId;
+    const running = toolbar && toolbar.style.display !== 'none';
     btn.textContent = running ? 'Flash Stop' : 'Flash';
     btn.classList.toggle('active', running);
 }
@@ -2544,6 +2545,7 @@ function toggleWave() {
             waveSnapshot = null;
         }
     } else {
+        if (flashIntervalId) stopFlashEngine();
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
@@ -2869,10 +2871,13 @@ function stopFlashEngine() {
 }
 
 function toggleFlash() {
-    if (flashIntervalId) {
+    const toolbar = document.getElementById('flashToolbar');
+    const running = toolbar.style.display !== 'none';
+    if (running) {
         stopFlashEngine();
     } else {
-        document.getElementById('flashToolbar').style.display = '';
+        if (waveRunning) toggleWave();
+        toolbar.style.display = '';
         syncFlashButton();
         if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
     }
