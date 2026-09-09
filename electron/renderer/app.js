@@ -1706,6 +1706,19 @@ function setupSceneGrid() {
         return btn;
     }
 
+    function createSmallSceneBtn(i) {
+        const btn = document.createElement('button');
+        btn.className = 'btn-scene btn-scene-momentane';
+        btn.id = 'scene-regular-' + i;
+        btn.dataset.index = i;
+        const numSpan = document.createElement('span');
+        numSpan.className = 'scene-btn-num';
+        numSpan.textContent = (i + 1).toString();
+        btn.appendChild(numSpan);
+        btn.addEventListener('click', (e) => handleSceneClick(e, i));
+        return btn;
+    }
+
     function createMomentaryBtn(i) {
         const btn = document.createElement('button');
         btn.className = 'btn-scene btn-scene-momentane';
@@ -1738,21 +1751,23 @@ function setupSceneGrid() {
         return btn;
     }
 
-    function buildRow(sceneStart, sceneEnd, momentaryOffset, withMomentaries) {
-        const row = document.createElement('div');
-        row.className = 'scene-row';
-        for (let i = sceneStart; i < sceneEnd; i++) row.appendChild(createSceneBtn(i));
-        if (withMomentaries) {
-            const sep = document.createElement('div');
-            sep.className = 'scene-separator';
-            row.appendChild(sep);
-            for (let i = 0; i < SCENE_MOMENTARY_COUNT; i++) row.appendChild(createMomentaryBtn(momentaryOffset + i));
-        }
-        return row;
-    }
+    const row1 = document.createElement('div');
+    row1.className = 'scene-row';
+    for (let i = 0; i < 14; i++) row1.appendChild(createSceneBtn(i));
+    const sep1 = document.createElement('div');
+    sep1.className = 'scene-separator';
+    row1.appendChild(sep1);
+    for (let i = 14; i < 18; i++) row1.appendChild(createSmallSceneBtn(i));
+    sceneAll.appendChild(row1);
 
-    sceneAll.appendChild(buildRow(0, 16, 0, false));
-    sceneAll.appendChild(buildRow(16, 32, 0, true));
+    const row2 = document.createElement('div');
+    row2.className = 'scene-row';
+    for (let i = 18; i < 32; i++) row2.appendChild(createSceneBtn(i));
+    const sep2 = document.createElement('div');
+    sep2.className = 'scene-separator';
+    row2.appendChild(sep2);
+    for (let i = 0; i < SCENE_MOMENTARY_COUNT; i++) row2.appendChild(createMomentaryBtn(i));
+    sceneAll.appendChild(row2);
 
     document.addEventListener('mouseup', () => {
         if (momentaryActiveIndex >= 0) handleMomentaneUp({}, momentaryActiveIndex);
