@@ -2555,13 +2555,19 @@ function toggleWave() {
         if (flashIntervalId || (flashToolbar && flashToolbar.style.display !== 'none')) {
             stopFlashEngine();
             if (flashSnapshot) {
-                flashSnapshot.forEach(sf => {
-                    const fixture = FixtureManager.getFixture(sf.id);
-                    if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
-                });
-                updateAllFixtureDisplays();
-                sendDMXBuffer();
+                const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
+                const bpm = flashBPM || 120;
+                const durationMs = (durationBeats / bpm) * 60000;
+                const snap = flashSnapshot;
                 flashSnapshot = null;
+                setTimeout(() => {
+                    snap.forEach(sf => {
+                        const fixture = FixtureManager.getFixture(sf.id);
+                        if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
+                    });
+                    updateAllFixtureDisplays();
+                    sendDMXBuffer();
+                }, durationMs + 50);
             }
         }
         waveRunning = true;
@@ -2821,6 +2827,10 @@ function flashTick() {
 function flashUnit(unit, halfMs) {
     const fixture = FixtureManager.getFixture(unit.fixtureId);
     if (!fixture) return;
+    const unitKey = unit.zone >= 0 ? `z${unit.zone}` : 'main';
+    if (!fixture._flashGens) fixture._flashGens = {};
+    fixture._flashGens[unitKey] = (fixture._flashGens[unitKey] || 0) + 1;
+    const gen = fixture._flashGens[unitKey];
     const colorMode = document.getElementById('flashColorMode').value;
     let r, g, b;
     if (colorMode === 'specific') {
@@ -2837,23 +2847,21 @@ function flashUnit(unit, halfMs) {
         FixtureManager.setChannelValue(fixture.id, off, r);
         FixtureManager.setChannelValue(fixture.id, off + 1, g);
         FixtureManager.setChannelValue(fixture.id, off + 2, b);
-        fixture._flashPeakColor = { r, g, b, zone: unit.zone, zoneCount: unit.zoneCount };
     } else if (FixtureManager.isRGBFixture(fixture)) {
         FixtureManager.setFixtureColor(fixture.id, r, g, b);
-        fixture._flashPeakColor = { r, g, b, zone: -1 };
     }
     setTimeout(() => {
+        if (gen !== fixture._flashGens[unitKey]) return;
         const fadeStart = performance.now();
         function fadeStep(now) {
+            if (gen !== fixture._flashGens[unitKey]) return;
             const elapsed = now - fadeStart;
             const progress = Math.min(elapsed / halfMs, 1);
-            const pk = fixture._flashPeakColor;
-            if (!pk) return;
-            const fr = Math.round(pk.r * (1 - progress));
-            const fg = Math.round(pk.g * (1 - progress));
-            const fb = Math.round(pk.b * (1 - progress));
-            if (pk.zone >= 0) {
-                const off = (pk.zoneCount - 1 - pk.zone) * 3;
+            const fr = Math.round(r * (1 - progress));
+            const fg = Math.round(g * (1 - progress));
+            const fb = Math.round(b * (1 - progress));
+            if (unit.zone >= 0) {
+                const off = (unit.zoneCount - 1 - unit.zone) * 3;
                 FixtureManager.setChannelValue(fixture.id, off, fr);
                 FixtureManager.setChannelValue(fixture.id, off + 1, fg);
                 FixtureManager.setChannelValue(fixture.id, off + 2, fb);
@@ -2863,7 +2871,6 @@ function flashUnit(unit, halfMs) {
             sendDMXBuffer();
             updateAllFixtureDisplays();
             if (progress < 1) requestAnimationFrame(fadeStep);
-            else fixture._flashPeakColor = null;
         }
         requestAnimationFrame(fadeStep);
     }, halfMs);
@@ -2881,9 +2888,6 @@ function startFlashEngine() {
 
 function stopFlashEngine() {
     if (flashIntervalId) { clearInterval(flashIntervalId); flashIntervalId = null; }
-    FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => flashOffFixture(f.id));
-    sendDMXBuffer();
-    updateAllFixtureDisplays();
     document.getElementById('flashToolbar').style.display = 'none';
     syncFlashButton();
 }
@@ -2894,17 +2898,39 @@ function toggleFlash() {
     if (running) {
         stopFlashEngine();
         if (flashSnapshot) {
-            flashSnapshot.forEach(sf => {
-                const fixture = FixtureManager.getFixture(sf.id);
-                if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
-            });
-            updateAllFixtureDisplays();
-            sendDMXBuffer();
+            const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
+            const bpm = flashBPM || 120;
+            const durationMs = (durationBeats / bpm) * 60000;
+            const snap = flashSnapshot;
             flashSnapshot = null;
+            setTimeout(() => {
+                snap.forEach(sf => {
+                    const fixture = FixtureManager.getFixture(sf.id);
+                    if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
+                });
+                updateAllFixtureDisplays();
+                sendDMXBuffer();
+            }, durationMs + 50);
         }
     } else {
         if (waveRunning) toggleWave();
         flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
+        FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => {
+            const profile = FixtureManager.getProfile(f.profileId);
+            const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(f.channels / 3) : 0;
+            if (zoneCount > 1) {
+                for (let z = 0; z < zoneCount; z++) {
+                    const off = (zoneCount - 1 - z) * 3;
+                    FixtureManager.setChannelValue(f.id, off, 0);
+                    FixtureManager.setChannelValue(f.id, off + 1, 0);
+                    FixtureManager.setChannelValue(f.id, off + 2, 0);
+                }
+            } else if (FixtureManager.isRGBFixture(f)) {
+                FixtureManager.setFixtureColor(f.id, 0, 0, 0);
+            }
+        });
+        sendDMXBuffer();
+        updateAllFixtureDisplays();
         toolbar.style.display = '';
         syncFlashButton();
         startFlashEngine();

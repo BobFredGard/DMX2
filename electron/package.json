@@ -46,6 +46,7 @@
     }
   },
   "dependencies": {
+    "@serialport/parser-byte-length": "^13.0.0",
     "serialport": "^12.0.0"
   },
   "devDependencies": {
