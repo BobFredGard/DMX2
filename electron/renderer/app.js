@@ -1840,10 +1840,6 @@ function restoreSceneState(scene) {
         document.getElementById('waveColorEnabled').checked = scene.waveColorEnabled;
         document.getElementById('waveColorGroup').style.display = scene.waveColorEnabled ? '' : 'none';
     }
-    if (scene.waveRunning !== undefined) {
-        if (scene.waveRunning && !waveRunning) toggleWave();
-        else if (!scene.waveRunning && waveRunning) toggleWave();
-    }
 
     if (scene.flashTrigger !== undefined) document.getElementById('flashTrigger').value = scene.flashTrigger;
     if (scene.flashDuration !== undefined) document.getElementById('flashDuration').value = scene.flashDuration;
@@ -1871,10 +1867,38 @@ function restoreSceneState(scene) {
             if (fid && scene.flashStates[fid] !== undefined) cb.checked = scene.flashStates[fid];
         });
     }
-    if (scene.flashRunning !== undefined) {
-        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
-        if (scene.flashRunning && !flashVisible) toggleFlash();
-        else if (!scene.flashRunning && flashVisible) toggleFlash();
+
+    if (scene.waveRunning && !waveRunning) {
+        waveRunning = true;
+        waveOffset = 0;
+        waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
+        document.getElementById('btnWave').textContent = 'Stop Vague';
+        document.getElementById('btnWave').classList.add('active');
+        document.getElementById('waveToolbar').style.display = '';
+        syncWaveButton();
+        runWave();
+    }
+    if (scene.flashRunning && !isFlashToolbarVisible()) {
+        flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
+        FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => {
+            const profile = FixtureManager.getProfile(f.profileId);
+            const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(f.channels / 3) : 0;
+            if (zoneCount > 1) {
+                for (let z = 0; z < zoneCount; z++) {
+                    const off = (zoneCount - 1 - z) * 3;
+                    FixtureManager.setChannelValue(f.id, off, 0);
+                    FixtureManager.setChannelValue(f.id, off + 1, 0);
+                    FixtureManager.setChannelValue(f.id, off + 2, 0);
+                }
+            } else if (FixtureManager.isRGBFixture(f)) {
+                FixtureManager.setFixtureColor(f.id, 0, 0, 0);
+            }
+        });
+        sendDMXBuffer();
+        updateAllFixtureDisplays();
+        document.getElementById('flashToolbar').style.display = '';
+        syncFlashButton();
+        startFlashEngine();
     }
 }
 
