@@ -128,4 +128,4 @@ Commandes reçues (depuis app tierce via WiFi/BT → ESP32 → série):
 ## Remerciements
 
 ESP_DMX
-https://github.com/someweisguy/esp_dmx
+- https://github.com/someweisguy/esp_dmx
