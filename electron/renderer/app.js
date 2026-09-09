@@ -1714,7 +1714,24 @@ function setupSceneGrid() {
         const numSpan = document.createElement('span');
         numSpan.className = 'scene-btn-num';
         numSpan.textContent = (i + 1).toString();
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.className = 'scene-btn-trans';
+        input.id = 'scene-trans-' + i;
+        input.min = '0';
+        input.max = '30';
+        input.step = '0.1';
+        input.value = '2';
+        input.title = 'Transition (s)';
+        input.addEventListener('click', (e) => e.stopPropagation());
+        input.addEventListener('mousedown', (e) => e.stopPropagation());
+        input.addEventListener('change', () => {
+            const v = parseFloat(input.value);
+            if (scenes[i]) scenes[i].transition = isNaN(v) ? 2 : Math.max(0, Math.min(30, v));
+            saveScenes();
+        });
         btn.appendChild(numSpan);
+        btn.appendChild(input);
         btn.addEventListener('click', (e) => handleSceneClick(e, i));
         return btn;
     }
