@@ -609,6 +609,10 @@ function renderFixtureCard(fixture, targetContainer) {
             <input type="checkbox" class="fixture-momentary-cb" data-id="${fixture.id}" ${fixture.momentaryEnabled !== false ? 'checked' : ''}>
             <span class="fixture-wave-label">Inst.</span>
         </label>
+        <label class="fixture-wave-toggle" title="Réagit aux flashs">
+            <input type="checkbox" class="fixture-flash-cb" data-id="${fixture.id}" ${fixture.flashEnabled ? 'checked' : ''}>
+            <span class="fixture-wave-label">Flash</span>
+        </label>
         <button class="btn-remove-fixture" data-id="${fixture.id}" title="Supprimer">&times;</button>
     `;
     card.appendChild(header);
@@ -665,6 +669,11 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-momentary-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setMomentaryEnabled(fixture.id, e.target.checked);
+    });
+    header.querySelector('.fixture-flash-cb').addEventListener('change', (e) => {
+        e.stopPropagation();
+        FixtureManager.setFlashEnabled(fixture.id, e.target.checked);
+        toggleFlashFixture(fixture.id, e.target.checked);
     });
 
     // Zone pickers for Starvilles (in card)
@@ -1824,8 +1833,9 @@ function restoreSceneState(scene) {
         document.getElementById('waveColorGroup').style.display = scene.waveColorEnabled ? '' : 'none';
     }
     if (scene.flashRunning !== undefined) {
-        if (scene.flashRunning && !flashIntervalId) toggleFlash();
-        else if (!scene.flashRunning && flashIntervalId) toggleFlash();
+        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
+        if (scene.flashRunning && !flashVisible) toggleFlash();
+        else if (!scene.flashRunning && flashVisible) toggleFlash();
     }
     if (scene.waveRunning !== undefined) pendingWaveState = scene.waveRunning;
 
@@ -1900,7 +1910,7 @@ function captureSceneData() {
         waveColorStart: document.getElementById('waveColorStart').value,
         waveColorEnd: document.getElementById('waveColorEnd').value,
         waveColorEnabled: document.getElementById('waveColorEnabled').checked,
-        flashRunning: !!flashIntervalId,
+        flashRunning: document.getElementById('flashToolbar').style.display !== 'none',
         flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
@@ -2545,7 +2555,8 @@ function toggleWave() {
             waveSnapshot = null;
         }
     } else {
-        if (flashIntervalId) stopFlashEngine();
+        const flashToolbar = document.getElementById('flashToolbar');
+        if (flashIntervalId || (flashToolbar && flashToolbar.style.display !== 'none')) stopFlashEngine();
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
@@ -2958,23 +2969,6 @@ function setupFlash() {
 }
 
 function updateFlashFixturesList() {
-    const container = document.getElementById('flashFixturesList');
-    if (!container) return;
-    container.innerHTML = '';
-    FixtureManager.getFixtures().forEach(f => {
-        const label = document.createElement('label');
-        const cb = document.createElement('input');
-        cb.type = 'checkbox';
-        cb.checked = flashActiveFixtures.has(f.id);
-        cb.addEventListener('change', () => {
-            FixtureManager.setFlashEnabled(f.id, cb.checked);
-            toggleFlashFixture(f.id, cb.checked);
-            syncFlashButton();
-        });
-        label.appendChild(cb);
-        label.appendChild(document.createTextNode(f.name));
-        container.appendChild(label);
-    });
 }
 
 function triggerFlashFromMIDI() {
@@ -3243,7 +3237,7 @@ function getCurrentSetData() {
         waveRunning: waveRunning,
         waveSpeed: parseInt(document.getElementById('waveSpeed').value) || 64,
         waveSpeedX2: document.getElementById('waveSpeedX2').checked,
-        flashRunning: !!flashIntervalId,
+        flashRunning: document.getElementById('flashToolbar').style.display !== 'none',
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
         flashColorMode: document.getElementById('flashColorMode').value,
@@ -3390,8 +3384,9 @@ function loadSetData(setData) {
         document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
     }
     if (setData.flashRunning !== undefined) {
-        if (setData.flashRunning && !flashIntervalId) toggleFlash();
-        else if (!setData.flashRunning && flashIntervalId) toggleFlash();
+        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
+        if (setData.flashRunning && !flashVisible) toggleFlash();
+        else if (!setData.flashRunning && flashVisible) toggleFlash();
     }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
@@ -3591,8 +3586,9 @@ function liveLoadSong(index) {
         document.getElementById('waveSpeedX2').checked = setData.waveSpeedX2;
     }
     if (setData.flashRunning !== undefined) {
-        if (setData.flashRunning && !flashIntervalId) toggleFlash();
-        else if (!setData.flashRunning && flashIntervalId) toggleFlash();
+        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
+        if (setData.flashRunning && !flashVisible) toggleFlash();
+        else if (!setData.flashRunning && flashVisible) toggleFlash();
     }
     if (setData.starEnabled !== undefined) {
         document.getElementById('starEnabled').checked = setData.starEnabled;
