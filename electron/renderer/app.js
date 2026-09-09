@@ -673,7 +673,14 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-flash-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setFlashEnabled(fixture.id, e.target.checked);
-        toggleFlashFixture(fixture.id, e.target.checked);
+        if (e.target.checked) {
+            flashActiveFixtures.add(fixture.id);
+        } else {
+            flashOffFixture(fixture.id);
+            flashActiveFixtures.delete(fixture.id);
+            sendDMXBuffer();
+            updateAllFixtureDisplays();
+        }
     });
 
     // Zone pickers for Starvilles (in card)
@@ -2899,23 +2906,8 @@ function isFlashToolbarVisible() {
 }
 
 function restartFlashEngine() {
-    stopFlashEngine();
+    if (flashIntervalId) { clearInterval(flashIntervalId); flashIntervalId = null; }
     if (isFlashToolbarVisible() && flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
-}
-
-function toggleFlashFixture(fixtureId, enabled) {
-    if (enabled) {
-        if (waveRunning) toggleWave();
-        flashActiveFixtures.add(fixtureId);
-        if (isFlashToolbarVisible() && !flashIntervalId && flashBPM) startFlashEngine();
-        else { flashTick(); }
-    } else {
-        flashOffFixture(fixtureId);
-        flashActiveFixtures.delete(fixtureId);
-        sendDMXBuffer();
-        updateAllFixtureDisplays();
-        if (flashActiveFixtures.size === 0) stopFlashEngine();
-    }
 }
 
 function handleTapTempo() {
