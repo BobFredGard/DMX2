@@ -124,3 +124,8 @@ ESP32 → PC:
 Commandes reçues (depuis app tierce via WiFi/BT → ESP32 → série):
 - `FLASH` → déclenche un flash sur fixtures actives
 - `FLASH #RRGGBB` → flash avec couleur spécifique
+
+## Remerciements
+
+ESP_DMX
+https://github.com/someweisguy/esp_dmx
