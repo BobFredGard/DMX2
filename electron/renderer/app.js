@@ -1661,7 +1661,7 @@ function renderGroupToolbar() {
 // SCENES (10 regular + 4 momentanés)
 // ============================================
 
-const SCENE_REGULAR_COUNT = 14;
+const SCENE_REGULAR_COUNT = 32;
 const SCENE_MOMENTARY_COUNT = 4;
 const SCENE_STORAGE_KEY = 'dmx2_scenes_v3';
 
@@ -1676,16 +1676,14 @@ function setupSceneGrid() {
     const sceneAll = document.getElementById('sceneAll');
     sceneAll.innerHTML = '';
 
-    for (let i = 0; i < SCENE_REGULAR_COUNT; i++) {
+    function createSceneBtn(i) {
         const btn = document.createElement('button');
         btn.className = 'btn-scene btn-scene-regular';
         btn.id = 'scene-regular-' + i;
         btn.dataset.index = i;
-
         const numSpan = document.createElement('span');
         numSpan.className = 'scene-btn-num';
         numSpan.textContent = (i + 1).toString();
-
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'scene-btn-trans';
@@ -1702,27 +1700,40 @@ function setupSceneGrid() {
             if (scenes[i]) scenes[i].transition = isNaN(v) ? 2 : Math.max(0, Math.min(30, v));
             saveScenes();
         });
-
         btn.appendChild(numSpan);
         btn.appendChild(input);
         btn.addEventListener('click', (e) => handleSceneClick(e, i));
-        sceneAll.appendChild(btn);
+        return btn;
     }
+
+    const row1 = document.createElement('div');
+    row1.className = 'scene-row';
+    for (let i = 0; i < 14; i++) row1.appendChild(createSceneBtn(i));
+    sceneAll.appendChild(row1);
+
+    const row2 = document.createElement('div');
+    row2.className = 'scene-row';
+    for (let i = 14; i < 28; i++) row2.appendChild(createSceneBtn(i));
+    sceneAll.appendChild(row2);
+
+    const momentRow = document.createElement('div');
+    momentRow.className = 'scene-row';
+    momentRow.id = 'momentRow';
+
+    for (let i = 28; i < 32; i++) momentRow.appendChild(createSceneBtn(i));
 
     const sep = document.createElement('div');
     sep.className = 'scene-separator';
-    sceneAll.appendChild(sep);
+    momentRow.appendChild(sep);
 
     for (let i = 0; i < SCENE_MOMENTARY_COUNT; i++) {
         const btn = document.createElement('button');
         btn.className = 'btn-scene btn-scene-momentane';
         btn.id = 'scene-momentane-' + i;
         btn.dataset.index = i;
-
         const numSpan = document.createElement('span');
         numSpan.className = 'scene-btn-num';
         numSpan.textContent = 'M' + (i + 1);
-
         const input = document.createElement('input');
         input.type = 'number';
         input.className = 'scene-btn-trans';
@@ -1734,10 +1745,8 @@ function setupSceneGrid() {
         input.title = 'Retour (s)';
         input.addEventListener('click', (e) => e.stopPropagation());
         input.addEventListener('mousedown', (e) => e.stopPropagation());
-
         btn.appendChild(numSpan);
         btn.appendChild(input);
-
         btn.addEventListener('click', (e) => handleSceneClick(e, i, true));
         btn.addEventListener('mousedown', (e) => handleMomentaneDown(e, i));
         btn.addEventListener('mouseup', (e) => handleMomentaneUp(e, i));
@@ -1746,8 +1755,9 @@ function setupSceneGrid() {
         });
         btn.addEventListener('touchstart', (e) => { e.preventDefault(); handleMomentaneDown(e, i); }, { passive: false });
         btn.addEventListener('touchend', (e) => { e.preventDefault(); handleMomentaneUp(e, i); });
-        sceneAll.appendChild(btn);
+        momentRow.appendChild(btn);
     }
+    sceneAll.appendChild(momentRow);
 
     document.addEventListener('mouseup', () => {
         if (momentaryActiveIndex >= 0) handleMomentaneUp({}, momentaryActiveIndex);
@@ -2281,6 +2291,31 @@ function handleMIDIMessage(msg) {
         return;
     }
 
+    // Note ON/OFF → momentanés (C1=24, D1=26, E1=28, F1=30)
+    const momentaryNotes = [24, 26, 28, 30];
+    if ((command === 0x90 || command === 0x80) && channel === midiChannel) {
+        const noteIdx = momentaryNotes.indexOf(cc);
+        if (noteIdx >= 0) {
+            const velocity = msg.data[2];
+            if (command === 0x90 && velocity > 0) {
+                const scene = momentanes[noteIdx];
+                if (!scene) return;
+                if (momentaryFadeId) { cancelAnimationFrame(momentaryFadeId); momentaryFadeId = null; }
+                if (!momentaryPreState) {
+                    momentaryPreState = Array.from(FixtureManager.getDMXChannels());
+                }
+                momentaryActiveIndex = noteIdx;
+                const btn = document.getElementById('scene-momentane-' + noteIdx);
+                if (btn) btn.classList.add('active-press');
+                restoreSceneState(scene);
+                applySceneValues(scene.values);
+            } else {
+                handleMomentaneUp({ target: document.getElementById('scene-momentane-' + noteIdx) }, noteIdx);
+            }
+            return;
+        }
+    }
+
     // Control Change → scènes
     if (command !== 0xB0 || channel !== midiChannel) return;
     if (cc < 0 || cc > 119) return;
@@ -2291,12 +2326,12 @@ function handleMIDIMessage(msg) {
     }
 
     let mode, sceneIndex;
-    if (cc < 10) {
+    if (cc >= 1 && cc <= 32) {
         mode = 'regular';
-        sceneIndex = cc;
-    } else if (cc < 14) {
+        sceneIndex = cc - 1;
+    } else if (cc >= 124 && cc <= 127) {
         mode = 'momentane';
-        sceneIndex = cc - 10;
+        sceneIndex = cc - 124;
     } else {
         return;
     }
@@ -2324,9 +2359,10 @@ function handleMIDIMessage(msg) {
             document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
             const btn = document.getElementById('scene-regular-' + sceneIndex);
             if (btn) btn.classList.add('selected');
+            restoreSceneState(scene);
             const transInput = document.getElementById('scene-trans-' + sceneIndex);
             const duration = transInput ? (parseFloat(transInput.value) * 1000 || 2000) : (scene.transition ? scene.transition * 1000 : 2000);
-            startSceneFade(scene.values, duration);
+            startSceneFade(scene.values, duration, !!scene.waveRunning, !!scene.flashRunning);
         }
     }
 }
