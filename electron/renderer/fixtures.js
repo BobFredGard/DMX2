@@ -193,6 +193,15 @@ const FixtureManager = (() => {
         if (!fixture) return;
         const offsets = getRGBOffsets(fixture);
         if (!offsets) return;
+        ensureDimmerActive(fixture);
+        const profile = getProfile(fixture.profileId);
+        if (profile && profile.controls) {
+            profile.controls.forEach(c => {
+                if (c.type === 'slider' && (c.name.toLowerCase() === 'blanc' || c.name.toLowerCase() === 'white') && c.offset !== undefined) {
+                    fixture.channelValues[c.offset] = 0;
+                }
+            });
+        }
         fixture.channelValues[offsets.r] = r;
         fixture.channelValues[offsets.g] = g;
         fixture.channelValues[offsets.b] = b;
