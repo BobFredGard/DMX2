@@ -412,7 +412,7 @@ function syncWaveButton() {
     const btn = document.getElementById('btnWave');
     const waveToolbar = document.getElementById('waveToolbar');
     if (!btn) return;
-    btn.textContent = waveRunning ? 'Stop' : 'Vague';
+    btn.textContent = waveRunning ? 'Stop Vague' : 'Vague';
     btn.classList.toggle('active', waveRunning);
     if (waveToolbar) waveToolbar.style.display = waveRunning ? '' : 'none';
 }
@@ -2549,7 +2549,7 @@ function toggleWave() {
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
-        btn.textContent = 'Stop';
+        btn.textContent = 'Stop Vague';
         btn.classList.add('active');
         waveToolbar.style.display = '';
         runWave();
@@ -2866,8 +2866,8 @@ function stopFlashEngine() {
     flashActiveFixtures.clear();
     sendDMXBuffer();
     updateAllFixtureDisplays();
-    syncFlashButton();
     document.getElementById('flashToolbar').style.display = 'none';
+    syncFlashButton();
 }
 
 function toggleFlash() {
