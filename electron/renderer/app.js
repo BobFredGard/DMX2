@@ -682,6 +682,7 @@ function renderFixtureCard(fixture, targetContainer) {
             sendDMXBuffer();
             updateAllFixtureDisplays();
         }
+        if (isFlashToolbarVisible()) restartFlashEngine();
     });
 
     // Zone pickers for Starvilles (in card)
