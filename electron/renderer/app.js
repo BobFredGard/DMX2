@@ -1780,11 +1780,10 @@ function handleSceneClick(e, index, isMomentary) {
     restoreSceneState(scene);
     const transInput = document.getElementById('scene-trans-' + index);
     const duration = transInput ? (parseFloat(transInput.value) * 1000 || 2000) : (scene.transition ? scene.transition * 1000 : 2000);
-    startSceneFade(scene.values, duration);
+    startSceneFade(scene.values, duration, !!scene.waveRunning, !!scene.flashRunning);
     showToast('Scène ' + (index + 1));
 }
 
-let pendingWaveState = null;
 
 function restoreSceneState(scene) {
     if (scene.zoneLinks) {
@@ -1819,6 +1818,15 @@ function restoreSceneState(scene) {
             }
         });
     }
+    if (scene.waveStates) {
+        Object.entries(scene.waveStates).forEach(([fid, active]) => {
+            FixtureManager.setWaveEnabled(fid, active);
+        });
+        document.querySelectorAll('.fixture-wave-cb').forEach(cb => {
+            const fid = cb.dataset.id;
+            if (fid && scene.waveStates[fid] !== undefined) cb.checked = scene.waveStates[fid];
+        });
+    }
     if (scene.waveSpeed !== undefined) document.getElementById('waveSpeed').value = scene.waveSpeed;
     if (scene.waveSpeedX2 !== undefined) document.getElementById('waveSpeedX2').checked = scene.waveSpeedX2;
     if (scene.starEnabled !== undefined) {
@@ -1832,12 +1840,10 @@ function restoreSceneState(scene) {
         document.getElementById('waveColorEnabled').checked = scene.waveColorEnabled;
         document.getElementById('waveColorGroup').style.display = scene.waveColorEnabled ? '' : 'none';
     }
-    if (scene.flashRunning !== undefined) {
-        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
-        if (scene.flashRunning && !flashVisible) toggleFlash();
-        else if (!scene.flashRunning && flashVisible) toggleFlash();
+    if (scene.waveRunning !== undefined) {
+        if (scene.waveRunning && !waveRunning) toggleWave();
+        else if (!scene.waveRunning && waveRunning) toggleWave();
     }
-    if (scene.waveRunning !== undefined) pendingWaveState = scene.waveRunning;
 
     if (scene.flashTrigger !== undefined) document.getElementById('flashTrigger').value = scene.flashTrigger;
     if (scene.flashDuration !== undefined) document.getElementById('flashDuration').value = scene.flashDuration;
@@ -1855,7 +1861,6 @@ function restoreSceneState(scene) {
         document.getElementById('flashBPM').textContent = flashBPM || '---';
     }
     if (scene.flashStates) {
-        stopFlashEngine();
         Object.entries(scene.flashStates).forEach(([fid, active]) => {
             const f = FixtureManager.getFixture(fid);
             if (f) f.flashEnabled = active;
@@ -1865,7 +1870,11 @@ function restoreSceneState(scene) {
             const fid = cb.dataset.id;
             if (fid && scene.flashStates[fid] !== undefined) cb.checked = scene.flashStates[fid];
         });
-        if (isFlashToolbarVisible()) restartFlashEngine();
+    }
+    if (scene.flashRunning !== undefined) {
+        const flashVisible = document.getElementById('flashToolbar').style.display !== 'none';
+        if (scene.flashRunning && !flashVisible) toggleFlash();
+        else if (!scene.flashRunning && flashVisible) toggleFlash();
     }
 }
 
@@ -2293,10 +2302,10 @@ function handleMIDIMessage(msg) {
     }
 }
 
-function startSceneFade(targetValues, duration) {
+function startSceneFade(targetValues, duration, skipWaveStop, skipFlashStop) {
     if (fadeReqId) cancelAnimationFrame(fadeReqId);
-    if (waveRunning) toggleWave();
-    stopFlashEngine();
+    if (!skipWaveStop && waveRunning) toggleWave();
+    if (!skipFlashStop && isFlashToolbarVisible()) stopFlashEngine();
 
     if (duration === 0) {
         applySceneValues(targetValues);
@@ -2317,6 +2326,7 @@ function startSceneFade(targetValues, duration) {
             lastRender = currentTime;
 
             fixtures.forEach((fixture, fi) => {
+                if ((fixture.flashEnabled && isFlashToolbarVisible()) || (fixture.waveEnabled && waveRunning)) return;
                 const profile = FixtureManager.getProfile(fixture.profileId);
 
                 if (profile && profile.hasZonePickers) {
@@ -2368,11 +2378,6 @@ function startSceneFade(targetValues, duration) {
             fadeReqId = null;
             updateAllFixtureDisplays();
             sendDMXBuffer();
-            if (pendingWaveState !== null) {
-                if (pendingWaveState && !waveRunning) toggleWave();
-                else if (!pendingWaveState && waveRunning) toggleWave();
-                pendingWaveState = null;
-            }
             syncWaveButton();
         }
     }
