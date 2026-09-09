@@ -22,7 +22,6 @@ let flashTapTimes = [];
 let flashBPM = null;
 let flashMidiCC = 119;
 let flashIntervalId = null;
-let flashActiveFixtures = new Set();
 let playlist = [];
 let currentSongIndex = -1;
 let lastSendTime = 0;
@@ -217,13 +216,13 @@ function setupSerialUI() {
     window.serial.onData((data) => {
         const line = data.toString().trim();
         if (line === 'FLASH') {
-            const activeIds = [...flashActiveFixtures];
+            const activeIds = FixtureManager.getFixtures().filter(f => f.flashEnabled).map(f => f.id);
             if (activeIds.length > 0) flashTick();
         } else if (line.startsWith('FLASH #')) {
             const hex = line.substring(7).trim();
             const rgb = hexToRgb(hex);
             if (rgb) {
-                const activeIds = [...flashActiveFixtures];
+                const activeIds = FixtureManager.getFixtures().filter(f => f.flashEnabled).map(f => f.id);
                 activeIds.forEach(id => {
                     const fixture = FixtureManager.getFixture(id);
                     if (!fixture) return;
@@ -674,14 +673,6 @@ function renderFixtureCard(fixture, targetContainer) {
     header.querySelector('.fixture-flash-cb').addEventListener('change', (e) => {
         e.stopPropagation();
         FixtureManager.setFlashEnabled(fixture.id, e.target.checked);
-        if (e.target.checked) {
-            flashActiveFixtures.add(fixture.id);
-        } else {
-            flashOffFixture(fixture.id);
-            flashActiveFixtures.delete(fixture.id);
-            sendDMXBuffer();
-            updateAllFixtureDisplays();
-        }
         if (isFlashToolbarVisible()) restartFlashEngine();
     });
 
@@ -1865,20 +1856,16 @@ function restoreSceneState(scene) {
     }
     if (scene.flashStates) {
         stopFlashEngine();
-        flashActiveFixtures.clear();
         Object.entries(scene.flashStates).forEach(([fid, active]) => {
             const f = FixtureManager.getFixture(fid);
-            if (f) {
-                f.flashEnabled = active;
-                if (active) flashActiveFixtures.add(fid);
-            }
+            if (f) f.flashEnabled = active;
         });
         updateFlashFixturesList();
         document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
             const fid = cb.dataset.id;
             if (fid && scene.flashStates[fid] !== undefined) cb.checked = scene.flashStates[fid];
         });
-        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+        if (isFlashToolbarVisible()) restartFlashEngine();
     }
 }
 
@@ -1920,7 +1907,7 @@ function captureSceneData() {
         waveColorEnd: document.getElementById('waveColorEnd').value,
         waveColorEnabled: document.getElementById('waveColorEnabled').checked,
         flashRunning: document.getElementById('flashToolbar').style.display !== 'none',
-        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
+        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = f.flashEnabled || false; return acc; }, {}),
         flashTrigger: document.getElementById('flashTrigger').value,
         flashDuration: document.getElementById('flashDuration').value,
         flashColorMode: document.getElementById('flashColorMode').value,
@@ -2773,7 +2760,7 @@ function flashFadeToBlack(fixtureId, progress) {
 }
 
 function flashTick() {
-    const activeIds = [...flashActiveFixtures];
+    const activeIds = FixtureManager.getFixtures().filter(f => f.flashEnabled).map(f => f.id);
     if (activeIds.length === 0) return;
 
     const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
@@ -2894,8 +2881,7 @@ function startFlashEngine() {
 
 function stopFlashEngine() {
     if (flashIntervalId) { clearInterval(flashIntervalId); flashIntervalId = null; }
-    flashActiveFixtures.forEach(id => flashOffFixture(id));
-    flashActiveFixtures.clear();
+    FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => flashOffFixture(f.id));
     sendDMXBuffer();
     updateAllFixtureDisplays();
     document.getElementById('flashToolbar').style.display = 'none';
@@ -2992,7 +2978,7 @@ function updateFlashFixturesList() {
 }
 
 function triggerFlashFromMIDI() {
-    const activeIds = [...flashActiveFixtures];
+    const activeIds = FixtureManager.getFixtures().filter(f => f.flashEnabled).map(f => f.id);
     if (activeIds.length === 0) return;
     flashTick();
 }
@@ -3264,7 +3250,7 @@ function getCurrentSetData() {
         flashMode: document.getElementById('flashMode').value,
         flashReverse: document.getElementById('flashReverse').checked,
         flashBPM: flashBPM,
-        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = flashActiveFixtures.has(f.id); return acc; }, {}),
+        flashStates: FixtureManager.getFixtures().reduce((acc, f) => { acc[f.id] = f.flashEnabled || false; return acc; }, {}),
         timestamp: Date.now()
     };
 
@@ -3443,17 +3429,16 @@ function loadSetData(setData) {
     }
     if (setData.flashStates) {
         stopFlashEngine();
-        flashActiveFixtures.clear();
         Object.entries(setData.flashStates).forEach(([fid, active]) => {
             const f = FixtureManager.getFixture(fid);
-            if (f) { f.flashEnabled = active; if (active) flashActiveFixtures.add(fid); }
+            if (f) f.flashEnabled = active;
         });
         updateFlashFixturesList();
         document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
             const fid = cb.dataset.id;
             if (fid && setData.flashStates[fid] !== undefined) cb.checked = setData.flashStates[fid];
         });
-        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+        if (isFlashToolbarVisible()) restartFlashEngine();
     }
 
     renderAllFixtures();
@@ -3645,17 +3630,16 @@ function liveLoadSong(index) {
     }
     if (setData.flashStates) {
         stopFlashEngine();
-        flashActiveFixtures.clear();
         Object.entries(setData.flashStates).forEach(([fid, active]) => {
             const f = FixtureManager.getFixture(fid);
-            if (f) { f.flashEnabled = active; if (active) flashActiveFixtures.add(fid); }
+            if (f) f.flashEnabled = active;
         });
         updateFlashFixturesList();
         document.querySelectorAll('.fixture-flash-cb').forEach(cb => {
             const fid = cb.dataset.id;
             if (fid && setData.flashStates[fid] !== undefined) cb.checked = setData.flashStates[fid];
         });
-        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+        if (isFlashToolbarVisible()) restartFlashEngine();
     }
 
     if (setData.scenes && Array.isArray(setData.scenes)) {
