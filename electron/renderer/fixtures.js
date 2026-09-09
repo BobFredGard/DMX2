@@ -188,11 +188,10 @@ const FixtureManager = (() => {
         });
     }
 
-    function setFixtureColor(fixtureId, r, g, b) {
+    function applyColorToFixture(fixtureId, r, g, b) {
         const fixture = fixtures.find(f => f.id === fixtureId);
         if (!fixture) return;
         const offsets = getRGBOffsets(fixture);
-        if (!offsets) return;
         ensureDimmerActive(fixture);
         const profile = getProfile(fixture.profileId);
         if (profile && profile.controls) {
@@ -202,11 +201,21 @@ const FixtureManager = (() => {
                 }
             });
         }
-        fixture.channelValues[offsets.r] = r;
-        fixture.channelValues[offsets.g] = g;
-        fixture.channelValues[offsets.b] = b;
+        if (offsets) {
+            fixture.channelValues[offsets.r] = r;
+            fixture.channelValues[offsets.g] = g;
+            fixture.channelValues[offsets.b] = b;
+        } else if (fixture.channels >= 3) {
+            fixture.channelValues[0] = r;
+            fixture.channelValues[1] = g;
+            fixture.channelValues[2] = b;
+        }
         scheduleSave();
         notifyListeners('colorChange', { fixture, r, g, b });
+    }
+
+    function setFixtureColor(fixtureId, r, g, b) {
+        applyColorToFixture(fixtureId, r, g, b);
     }
 
     function setWaveEnabled(fixtureId, enabled) {
@@ -630,7 +639,7 @@ const FixtureManager = (() => {
         addFixture, removeFixture, getFixtures, getFixture,
         getProfiles, getProfile,
         setChannelValue, setChannelValuesBulk, getDMXChannels,
-        setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setReverseWave, setMomentaryEnabled, setZoneLink, getZoneLinks,
+        setFixtureColor, getFixtureRGB, isRGBFixture, setAllRGB, setWaveEnabled, setReverseWave, setMomentaryEnabled, setZoneLink, getZoneLinks, getRGBOffsets, applyColorToFixture,
         setFlashEnabled, setFlashColorMode, setFlashColor,
         renameFixture,
         getNextAvailableChannel, isChannelRangeFree,

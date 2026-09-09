@@ -2769,8 +2769,8 @@ function runWave() {
                     FixtureManager.setChannelValue(fixture.id, off, r);
                     FixtureManager.setChannelValue(fixture.id, off + 1, g);
                     FixtureManager.setChannelValue(fixture.id, off + 2, b);
-                } else if (FixtureManager.isRGBFixture(fixture)) {
-                    FixtureManager.setFixtureColor(fixture.id, r, g, b);
+                } else {
+                    FixtureManager.applyColorToFixture(fixture.id, r, g, b);
                 }
 
                 globalZoneIdx++;
@@ -2798,33 +2798,25 @@ function flashOnFixture(fixtureId) {
     const profile = FixtureManager.getProfile(fixture.profileId);
     const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 0;
 
+    let r, g, b;
+    if (colorMode === 'specific') {
+        const rgb = hexToRgb(fixture.flashColor || '#ffffff');
+        r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
+    } else {
+        r = Math.floor(Math.random() * 256);
+        g = Math.floor(Math.random() * 256);
+        b = Math.floor(Math.random() * 256);
+    }
+
     if (zoneCount > 1) {
         for (let z = 0; z < zoneCount; z++) {
-            let r, g, b;
-            if (colorMode === 'specific') {
-                const rgb = hexToRgb(fixture.flashColor || '#ffffff');
-                r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
-            } else {
-                r = Math.floor(Math.random() * 256);
-                g = Math.floor(Math.random() * 256);
-                b = Math.floor(Math.random() * 256);
-            }
             const off = (zoneCount - 1 - z) * 3;
             FixtureManager.setChannelValue(fixture.id, off, r);
             FixtureManager.setChannelValue(fixture.id, off + 1, g);
             FixtureManager.setChannelValue(fixture.id, off + 2, b);
         }
-    } else if (FixtureManager.isRGBFixture(fixture)) {
-        let r, g, b;
-        if (colorMode === 'specific') {
-            const rgb = hexToRgb(fixture.flashColor || '#ffffff');
-            r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
-        } else {
-            r = Math.floor(Math.random() * 256);
-            g = Math.floor(Math.random() * 256);
-            b = Math.floor(Math.random() * 256);
-        }
-        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+    } else {
+        FixtureManager.applyColorToFixture(fixture.id, r, g, b);
     }
 }
 
@@ -2840,8 +2832,8 @@ function flashOffFixture(fixtureId) {
             FixtureManager.setChannelValue(fixture.id, off + 1, 0);
             FixtureManager.setChannelValue(fixture.id, off + 2, 0);
         }
-    } else if (FixtureManager.isRGBFixture(fixture)) {
-        FixtureManager.setFixtureColor(fixture.id, 0, 0, 0);
+    } else {
+        FixtureManager.applyColorToFixture(fixture.id, 0, 0, 0);
     }
     fixture._flashPreState = null;
 }
@@ -2861,8 +2853,8 @@ function flashFadeToBlack(fixtureId, progress) {
             FixtureManager.setChannelValue(fixture.id, off + 1, g);
             FixtureManager.setChannelValue(fixture.id, off + 2, b);
         }
-    } else if (FixtureManager.isRGBFixture(fixture)) {
-        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+    } else {
+        FixtureManager.applyColorToFixture(fixture.id, r, g, b);
     }
 }
 
@@ -2948,8 +2940,8 @@ function flashUnit(unit, halfMs) {
         FixtureManager.setChannelValue(fixture.id, off, r);
         FixtureManager.setChannelValue(fixture.id, off + 1, g);
         FixtureManager.setChannelValue(fixture.id, off + 2, b);
-    } else if (FixtureManager.isRGBFixture(fixture)) {
-        FixtureManager.setFixtureColor(fixture.id, r, g, b);
+    } else {
+        FixtureManager.applyColorToFixture(fixture.id, r, g, b);
     }
     setTimeout(() => {
         if (gen !== fixture._flashGens[unitKey]) return;
