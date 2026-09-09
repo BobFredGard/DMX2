@@ -10,8 +10,7 @@
         { "name": "Bleu", "type": "channel", "offset": 2 },
         { "name": "Blanc", "type": "slider", "offset": 3, "min": 0, "max": 255 },
         { "name": "Dimmer", "type": "slider", "offset": 4, "min": 0, "max": 255 },
-        { "name": "Flash", "type": "slider", "offset": 5, "min": 0, "max": 255 },
-        { "name": "Automatiques", "type": "slider", "offset": 6, "min": 0, "max": 255 }
+        { "name": "Flash", "type": "slider", "offset": 5, "min": 0, "max": 255 }
       ],
       "hasColorPicker": true
     },
