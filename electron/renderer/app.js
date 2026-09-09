@@ -1708,7 +1708,7 @@ function setupSceneGrid() {
 
     function createSmallSceneBtn(i) {
         const btn = document.createElement('button');
-        btn.className = 'btn-scene btn-scene-momentane';
+        btn.className = 'btn-scene btn-scene-small';
         btn.id = 'scene-regular-' + i;
         btn.dataset.index = i;
         const numSpan = document.createElement('span');
@@ -1812,7 +1812,7 @@ function handleSceneClick(e, index, isMomentary) {
 
     if (!scene) { showToast('Scène vide'); return; }
 
-    document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.btn-scene-regular, .btn-scene-small').forEach(b => b.classList.remove('selected'));
     if (btn) btn.classList.add('selected');
     restoreSceneState(scene);
     const transInput = document.getElementById('scene-trans-' + index);
@@ -2098,7 +2098,7 @@ function restoreAllSceneButtons() {
 function autoSelectFirstScene(duration) {
     for (let i = 0; i < SCENE_REGULAR_COUNT; i++) {
         if (scenes[i]) {
-            document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.btn-scene-regular, .btn-scene-small').forEach(b => b.classList.remove('selected'));
             const btn = document.getElementById('scene-regular-' + i);
             if (btn) {
                 btn.classList.add('selected');
@@ -2113,7 +2113,7 @@ function autoSelectFirstScene(duration) {
 function launchSceneOne() {
     const scene = scenes[0];
     if (scene) {
-        document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
+        document.querySelectorAll('.btn-scene-regular, .btn-scene-small').forEach(b => b.classList.remove('selected'));
         const btn = document.getElementById('scene-regular-0');
         if (btn) btn.classList.add('selected');
         restoreSceneState(scene);
@@ -2131,7 +2131,7 @@ function launchSceneOneFromSetData(setData, durationMs) {
         scene = setData.scenes.lente.scenes?.[0];
     }
     if (!scene) { showToast('Scène 1 vide'); return; }
-    document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
+    document.querySelectorAll('.btn-scene-regular, .btn-scene-small').forEach(b => b.classList.remove('selected'));
     const btn = document.getElementById('scene-regular-0');
     if (btn) btn.classList.add('selected');
     restoreSceneState(scene);
@@ -2383,7 +2383,7 @@ function handleMIDIMessage(msg) {
         if (value > 0) {
             const scene = scenes[sceneIndex];
             if (!scene) return;
-            document.querySelectorAll('.btn-scene-regular').forEach(b => b.classList.remove('selected'));
+            document.querySelectorAll('.btn-scene-regular, .btn-scene-small').forEach(b => b.classList.remove('selected'));
             const btn = document.getElementById('scene-regular-' + sceneIndex);
             if (btn) btn.classList.add('selected');
             restoreSceneState(scene);

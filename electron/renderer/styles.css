@@ -1165,6 +1165,36 @@ select option { background: #1a1a1a; }
     box-shadow: 0 0 12px rgba(48, 209, 88, 0.6);
 }
 
+.btn-scene-small.saved {
+    background: rgba(0, 132, 255, 0.2);
+    border-color: rgba(0, 132, 255, 0.5);
+    color: #0084ff;
+    font-weight: 600;
+}
+.btn-scene-small.selected {
+    background: rgba(0, 132, 255, 0.45);
+    border-color: #0084ff;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(0, 132, 255, 0.4);
+}
+.btn-scene-small.tempo {
+    background: rgba(255, 50, 50, 0.15);
+    border-color: rgba(255, 50, 50, 0.4);
+    color: #ff4444;
+    font-weight: 600;
+}
+.btn-scene-small.tempo.saved {
+    background: rgba(255, 50, 50, 0.25);
+    border-color: rgba(255, 50, 50, 0.5);
+    color: #ff4444;
+}
+.btn-scene-small.tempo.selected {
+    background: rgba(255, 50, 50, 0.45);
+    border-color: #ff3333;
+    color: #fff;
+    box-shadow: 0 0 8px rgba(255, 50, 50, 0.4);
+}
+
 /* ============================================
    SLIDERS SECTION
    ============================================ */
