@@ -2773,7 +2773,7 @@ function flashFadeToBlack(fixtureId, progress) {
 
 function flashTick() {
     const activeIds = [...flashActiveFixtures];
-    if (activeIds.length === 0) { stopFlashEngine(); return; }
+    if (activeIds.length === 0) return;
 
     const durationBeats = parseFloat(document.getElementById('flashDuration').value) || 0.5;
     const bpm = flashBPM || 120;
