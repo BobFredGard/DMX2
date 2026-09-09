@@ -2681,104 +2681,108 @@ let waveFrameCount = 0;
 function runWave() {
     if (!waveRunning) return;
 
-    waveFrameCount++;
+    try {
+        waveFrameCount++;
 
-    const starsOn = document.getElementById('starEnabled').checked;
-    const useCustomRange = document.getElementById('waveColorEnabled').checked;
-    const colorStartHex = document.getElementById('waveColorStart').value;
-    const colorEndHex = document.getElementById('waveColorEnd').value;
+        const starsOn = document.getElementById('starEnabled').checked;
+        const useCustomRange = document.getElementById('waveColorEnabled').checked;
+        const colorStartHex = document.getElementById('waveColorStart').value;
+        const colorEndHex = document.getElementById('waveColorEnd').value;
 
-    const speedInput = document.getElementById('waveSpeed');
-    const baseSpeed = speedInput ? speedInput.value * 0.00005 : 0.0005;
-    const speedX2 = document.getElementById('waveSpeedX2').checked ? 2 : 1;
-    const speed = (useCustomRange ? baseSpeed * 4 : baseSpeed) * speedX2;
-    waveOffset += speed;
+        const speedInput = document.getElementById('waveSpeed');
+        const baseSpeed = speedInput ? speedInput.value * 0.00005 : 0.0005;
+        const speedX2 = document.getElementById('waveSpeedX2').checked ? 2 : 1;
+        const speed = (useCustomRange ? baseSpeed * 4 : baseSpeed) * speedX2;
+        waveOffset += speed;
 
-    let startHue = 0, endHue = 360;
-    let startRgb = null, endRgb = null;
-    if (useCustomRange) {
-        startRgb = hexToRgb(colorStartHex);
-        endRgb = hexToRgb(colorEndHex);
-    }
+        let startRgb = null, endRgb = null;
+        if (useCustomRange) {
+            startRgb = hexToRgb(colorStartHex);
+            endRgb = hexToRgb(colorEndHex);
+        }
 
-    const now = performance.now();
+        const now = performance.now();
 
-    if (starsOn) {
+        if (starsOn) {
+            const waveFixtures = FixtureManager.getFixtures().filter(f => f.waveEnabled);
+            if (now > starNextSpawn && waveFixtures.length > 0) {
+                const fixture = waveFixtures[Math.floor(Math.random() * waveFixtures.length)];
+                const profile = FixtureManager.getProfile(fixture.profileId);
+                const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 1;
+                const zone = Math.floor(Math.random() * zoneCount);
+                const key = fixture.id + '_z' + zone;
+                if (!starActive[key]) {
+                    starActive[key] = {
+                        start: now,
+                        duration: 10 + Math.random() * 40,
+                        intensity: 0.4 + Math.random() * 0.6
+                    };
+                }
+                starNextSpawn = now + 500 + (1 - (document.getElementById('starFreq').value / 127)) * 8000;
+            }
+        }
+
         const waveFixtures = FixtureManager.getFixtures().filter(f => f.waveEnabled);
-        if (now > starNextSpawn && waveFixtures.length > 0) {
-            const fixture = waveFixtures[Math.floor(Math.random() * waveFixtures.length)];
+        let globalZoneIdx = 0;
+        const totalZones = waveFixtures.reduce((sum, f) => {
+            const p = FixtureManager.getProfile(f.profileId);
+            return sum + ((p && p.hasZonePickers) ? Math.floor(f.channels / 3) : 1);
+        }, 0);
+
+        waveFixtures.forEach((fixture) => {
             const profile = FixtureManager.getProfile(fixture.profileId);
             const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 1;
-            const zone = Math.floor(Math.random() * zoneCount);
-            const key = fixture.id + '_z' + zone;
-            if (!starActive[key]) {
-                starActive[key] = {
-                    start: now,
-                    duration: 10 + Math.random() * 40,
-                    intensity: 0.4 + Math.random() * 0.6
-                };
-            }
-            starNextSpawn = now + 500 + (1 - (document.getElementById('starFreq').value / 127)) * 8000;
-        }
-    }
 
-    const waveFixtures = FixtureManager.getFixtures().filter(f => f.waveEnabled);
-    let globalZoneIdx = 0;
-    const totalZones = waveFixtures.reduce((sum, f) => {
-        const p = FixtureManager.getProfile(f.profileId);
-        return sum + ((p && p.hasZonePickers) ? Math.floor(f.channels / 3) : 1);
-    }, 0);
+            for (let z = 0; z < zoneCount; z++) {
+                const zMapped = fixture.reverseWave ? (zoneCount - 1 - z) : z;
+                let r, g, b;
 
-    waveFixtures.forEach((fixture) => {
-        const profile = FixtureManager.getProfile(fixture.profileId);
-        const zoneCount = (profile && profile.hasZonePickers) ? Math.floor(fixture.channels / 3) : 1;
+                if (useCustomRange && startRgb && endRgb && totalZones > 0) {
+                    const sinVal = Math.sin(waveOffset + (globalZoneIdx / totalZones) * Math.PI * 2);
+                    const t = (sinVal + 1) / 2;
+                    r = Math.round(startRgb.r + (endRgb.r - startRgb.r) * t);
+                    g = Math.round(startRgb.g + (endRgb.g - startRgb.g) * t);
+                    b = Math.round(startRgb.b + (endRgb.b - startRgb.b) * t);
+                } else {
+                    const hue = (waveOffset * 60 + globalZoneIdx * 25) % 360;
+                    [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
+                }
 
-        for (let z = 0; z < zoneCount; z++) {
-            const zMapped = fixture.reverseWave ? (zoneCount - 1 - z) : z;
-            let r, g, b;
-
-            if (useCustomRange && startRgb && endRgb) {
-                const sinVal = Math.sin(waveOffset + (globalZoneIdx / totalZones) * Math.PI * 2);
-                const t = (sinVal + 1) / 2;
-                r = Math.round(startRgb.r + (endRgb.r - startRgb.r) * t);
-                g = Math.round(startRgb.g + (endRgb.g - startRgb.g) * t);
-                b = Math.round(startRgb.b + (endRgb.b - startRgb.b) * t);
-            } else {
-                const hue = (waveOffset * 60 + globalZoneIdx * 25) % 360;
-                [r, g, b] = hslToRgb(hue / 360, 1, 0.5);
-            }
-
-            if (starsOn) {
-                const key = fixture.id + '_z' + z;
-                const star = starActive[key];
-                if (star) {
-                    const elapsed = now - star.start;
-                    if (elapsed >= star.duration) {
-                        delete starActive[key];
-                    } else {
-                        const w = star.intensity;
-                        r = Math.round(r + (255 - r) * w);
-                        g = Math.round(g + (255 - g) * w);
-                        b = Math.round(b + (255 - b) * w);
+                if (starsOn) {
+                    const key = fixture.id + '_z' + z;
+                    const star = starActive[key];
+                    if (star) {
+                        const elapsed = now - star.start;
+                        if (elapsed >= star.duration) {
+                            delete starActive[key];
+                        } else {
+                            const w = star.intensity;
+                            r = Math.round(r + (255 - r) * w);
+                            g = Math.round(g + (255 - g) * w);
+                            b = Math.round(b + (255 - b) * w);
+                        }
                     }
                 }
+
+                if (zoneCount > 1) {
+                    const off = (zoneCount - 1 - zMapped) * 3;
+                    FixtureManager.setChannelValue(fixture.id, off, r);
+                    FixtureManager.setChannelValue(fixture.id, off + 1, g);
+                    FixtureManager.setChannelValue(fixture.id, off + 2, b);
+                } else if (FixtureManager.isRGBFixture(fixture)) {
+                    FixtureManager.setFixtureColor(fixture.id, r, g, b);
+                }
+
+                globalZoneIdx++;
             }
+        });
 
-            if (zoneCount > 1) {
-                const off = (zoneCount - 1 - zMapped) * 3;
-                FixtureManager.setChannelValue(fixture.id, off, r);
-                FixtureManager.setChannelValue(fixture.id, off + 1, g);
-                FixtureManager.setChannelValue(fixture.id, off + 2, b);
-            } else if (FixtureManager.isRGBFixture(fixture)) {
-                FixtureManager.setFixtureColor(fixture.id, r, g, b);
-            }
+        sendDMXBuffer();
+        updateAllFixtureDisplays();
+    } catch (e) {
+        console.error('Wave error:', e);
+    }
 
-            globalZoneIdx++;
-        }
-    });
-
-    sendDMXBuffer();
-    updateAllFixtureDisplays();
     waveReqId = requestAnimationFrame(runWave);
 }
 
