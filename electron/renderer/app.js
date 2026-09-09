@@ -8,6 +8,7 @@ let waveRunning = false;
 let waveReqId = null;
 let waveOffset = 0;
 let waveSnapshot = null;
+let flashSnapshot = null;
 let starActive = {};
 let starNextSpawn = 0;
 let fadeReqId = null;
@@ -2563,7 +2564,18 @@ function toggleWave() {
         }
     } else {
         const flashToolbar = document.getElementById('flashToolbar');
-        if (flashIntervalId || (flashToolbar && flashToolbar.style.display !== 'none')) stopFlashEngine();
+        if (flashIntervalId || (flashToolbar && flashToolbar.style.display !== 'none')) {
+            stopFlashEngine();
+            if (flashSnapshot) {
+                flashSnapshot.forEach(sf => {
+                    const fixture = FixtureManager.getFixture(sf.id);
+                    if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
+                });
+                updateAllFixtureDisplays();
+                sendDMXBuffer();
+                flashSnapshot = null;
+            }
+        }
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
@@ -2824,7 +2836,8 @@ function flashUnit(unit, halfMs) {
     const colorMode = document.getElementById('flashColorMode').value;
     let r, g, b;
     if (colorMode === 'specific') {
-        const rgb = hexToRgb(fixture.flashColor || '#ffffff');
+        const hex = document.getElementById('flashColor').value || '#ffffff';
+        const rgb = hexToRgb(hex);
         r = rgb ? rgb.r : 255; g = rgb ? rgb.g : 255; b = rgb ? rgb.b : 255;
     } else {
         r = Math.floor(Math.random() * 256);
@@ -2893,11 +2906,21 @@ function toggleFlash() {
     const running = toolbar.style.display !== 'none';
     if (running) {
         stopFlashEngine();
+        if (flashSnapshot) {
+            flashSnapshot.forEach(sf => {
+                const fixture = FixtureManager.getFixture(sf.id);
+                if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
+            });
+            updateAllFixtureDisplays();
+            sendDMXBuffer();
+            flashSnapshot = null;
+        }
     } else {
         if (waveRunning) toggleWave();
+        flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
         toolbar.style.display = '';
         syncFlashButton();
-        if (flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+        startFlashEngine();
     }
 }
 
@@ -2907,7 +2930,7 @@ function isFlashToolbarVisible() {
 
 function restartFlashEngine() {
     if (flashIntervalId) { clearInterval(flashIntervalId); flashIntervalId = null; }
-    if (isFlashToolbarVisible() && flashActiveFixtures.size > 0 && flashBPM) startFlashEngine();
+    if (isFlashToolbarVisible()) startFlashEngine();
 }
 
 function handleTapTempo() {
