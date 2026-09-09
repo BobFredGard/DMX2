@@ -1738,19 +1738,21 @@ function setupSceneGrid() {
         return btn;
     }
 
-    function buildRow(sceneStart, sceneEnd, momentaryOffset) {
+    function buildRow(sceneStart, sceneEnd, momentaryOffset, withMomentaries) {
         const row = document.createElement('div');
         row.className = 'scene-row';
         for (let i = sceneStart; i < sceneEnd; i++) row.appendChild(createSceneBtn(i));
-        const sep = document.createElement('div');
-        sep.className = 'scene-separator';
-        row.appendChild(sep);
-        for (let i = 0; i < SCENE_MOMENTARY_COUNT; i++) row.appendChild(createMomentaryBtn(momentaryOffset + i));
+        if (withMomentaries) {
+            const sep = document.createElement('div');
+            sep.className = 'scene-separator';
+            row.appendChild(sep);
+            for (let i = 0; i < SCENE_MOMENTARY_COUNT; i++) row.appendChild(createMomentaryBtn(momentaryOffset + i));
+        }
         return row;
     }
 
-    sceneAll.appendChild(buildRow(0, 16, 0));
-    sceneAll.appendChild(buildRow(16, 32, 2));
+    sceneAll.appendChild(buildRow(0, 16, 0, false));
+    sceneAll.appendChild(buildRow(16, 32, 0, true));
 
     document.addEventListener('mouseup', () => {
         if (momentaryActiveIndex >= 0) handleMomentaneUp({}, momentaryActiveIndex);
