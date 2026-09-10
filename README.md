@@ -2,6 +2,10 @@
 
 Application de pilotage DMX avec ESP32, interface graphique Electron et fixtures dynamiques.
 
+## Inteface Graphique
+<img width="1386" height="893" alt="image" src="https://github.com/user-attachments/assets/804153f6-c719-4ead-8be3-5d765f1d7106" />
+
+
 ## Architecture
 
 ```
