@@ -676,7 +676,7 @@ function renderFixtureCard(fixture, targetContainer) {
         if (isFlashToolbarVisible()) restartFlashEngine();
     });
 
-    // Zone pickers for Starvilles (in card)
+    // Zone pickers for Stervilles (in card)
     if (profile && profile.hasZonePickers) {
         const zonesContainer = document.createElement('div');
         zonesContainer.className = 'fixture-zones';

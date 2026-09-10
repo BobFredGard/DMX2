@@ -16,7 +16,7 @@
     },
     {
       "id": "starville_14ch",
-      "name": "Starville 4 Zones (14ch)",
+      "name": "Sterville 4 Zones (14ch)",
       "channels": 14,
       "controls": [
         { "name": "Z4 Rouge", "type": "channel", "offset": 0 },

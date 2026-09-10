@@ -57,7 +57,7 @@ pio run --target upload
 
 - Dimmer (1ch)
 - Spot RGBW (8ch) — Rouge, Vert, Bleu, Blanc, Dimmer, Flash
-- Starville 4 Zones (14ch) — 4 zones RGB + Flash + Dimmer
+- Sterville 4 Zones (14ch) — 4 zones RGB + Flash + Dimmer
 - Lyre 8ch / 12ch — Pan, Tilt, RGB
 - Wash 6ch — Dimmer, RGB, Vitesse, Mode
 - Profils personnalisés (nombre de canaux libre)
@@ -65,14 +65,14 @@ pio run --target upload
 ## Fonctionnalités principales
 
 - **Fixtures dynamiques** : ajout/suppression à la volée, profils personnalisés
-- **Color picker** par fixture (zones Starville et single-color pour Spots)
+- **Color picker** par fixture (zones Sterville et single-color pour Spots)
 - **Scènes** (32 régulières + 4 momentanées) : Ctrl+Click save sans vague/flash, Ctrl+Shift+Click save avec, Click recall, Shift+Click delete
 - **Transition** : temps de fondu réglable par scène (0-30s)
 - **Playlist** par chanson (sidebar, 128 songs)
 - **Animation vague** (voir détails ci-dessous)
 - **Flash musical** (voir détails ci-dessous)
 - **Spot linking** : lier les couleurs entre spots
-- **Zone linking** : lier les zones Starville (L12, L34, LAll)
+- **Zone linking** : lier les zones Sterville (L12, L34, LAll)
 - **Contrôle MIDI** complet (voir mapping ci-dessous)
 - **Momentanées** : 4 boutons press/relâche
 - **Import/Export** JSON (fixtures, scènes, chansons, MIDI)
@@ -98,9 +98,9 @@ La vague fait tourner une couleur sinusoïdale sur les fixtures sélectionnées.
 - **Fréquence étoiles** : slider pour densité des étoiles
 
 ### Comportement
-- **Starville (zone pickers)** : chaque zone = 1 étape de vague (couleur décalée)
+- **Sterville (zone pickers)** : chaque zone = 1 étape de vague (couleur décalée)
 - **Spot RGBW / autres** : fixture entière = 1 étape
-- **Inversion vague** : checkbox "Inversion" dans card Starville → sens inverse
+- **Inversion vague** : checkbox "Inversion" dans card Sterville → sens inverse
 - **Total zones** : toutes les zones des fixtures `waveEnabled` forment un cycle continu
 - **Performance** : 60fps, throttle DMX 2ms, trim trailing zeros
 
@@ -129,7 +129,7 @@ Système de flash rythmique par fixture, synchronisé au tempo (BPM).
 - **Mode** :
   - `random` : 1-2 unités flashent aléatoirement à chaque déclencheur
   - `sequential` : unités flashent une par une dans l'ordre
-  - `group4` : flash par groupes de 4 (Starville zones)
+  - `group4` : flash par groupes de 4 (Sterville zones)
 - **Reverse** : inverser l'ordre (sequential/group4)
 - **Couleur** : `random` ou `specific` (color picker par fixture)
 
@@ -192,8 +192,8 @@ Chaque scène enregistre : fixtures flashEnabled, BPM, subdivisions déclencheur
 
 - Baud rate : 921600 (250kbaud bus DMX, 921600 série USB)
 - Paquets optimisés : envoi uniquement des canaux actifs (trim trailing zeros)
-  - 36 canaux (2 Starvilles) → paquet de 41 octets → ~0.4ms
-  - 14 canaux (1 Starville) → paquet de 19 octets → ~0.2ms
+  - 36 canaux (2 Stervilles) → paquet de 41 octets → ~0.4ms
+  - 14 canaux (1 Sterville) → paquet de 19 octets → ~0.2ms
 - Envoi à chaque frame (~60fps) sans frame skipping
 - Throttle série : 2ms minimum entre envois
 - DMX frame time : ~1.6ms pour 36 canaux (~22ms pour 512)
@@ -203,10 +203,10 @@ Chaque scène enregistre : fixtures flashEnabled, BPM, subdivisions déclencheur
 
 ## Profils de fixtures (détails)
 
-- **Starville 4 Zones** : zones inversées (Z1 UI = offsets 9-11, Z4 = offsets 0-2). Flash=offset 12, Dimmer=offset 13.
+- **Sterville 4 Zones** : zones inversées (Z1 UI = offsets 9-11, Z4 = offsets 0-2). Flash=offset 12, Dimmer=offset 13.
 - **Spot RGBW 8ch** : Rouge(0), Vert(1), Bleu(2), Blanc(3 slider), Dimmer(4 slider), Flash(5 slider). Pas d'automatiques.
 - **Dimmer** : 1ch, auto-dim forcé à 255 si à 0 lors set color
-- **Vague inversée** : par fixture Starville (checkbox "Inversion")
+- **Vague inversée** : par fixture Sterville (checkbox "Inversion")
 - **Dimmer scènes** : valeur sauvegardée, pas forcé à 255
 
 ---
