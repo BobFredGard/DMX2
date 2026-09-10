@@ -239,3 +239,6 @@ xattr -cr /Applications/LumiDMX.app
 
 **ESP_DMX**
 - https://github.com/someweisguy/esp_dmx
+
+**OpenCode**
+- Application développée par IA via OpenCode et toutes les IA FREE proposée dont "MiMO V2,5" pour la grande majorité du code (j'en suis arrivé au bout la sa gratuité !) et dernièrement "Nemotron 3 Ultra Free"
