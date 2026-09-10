@@ -240,6 +240,9 @@ xattr -cr /Applications/LumiDMX.app
 **ESP_DMX**
 - https://github.com/someweisguy/esp_dmx
 
+**COLORIS**
+- https://coloris.js.org/
+
 **OpenCode**
 - Application développée par IA via OpenCode et toutes les IA FREE proposées dont "MiMO V2,5" pour la grande majorité du code (j'en suis arrivé au bout de sa gratuité !) et dernièrement "Nemotron 3 Ultra Free"
 - Ce ne fût pas un long fleuve tranquille. Beaucoup de tests sont nécessaires pour arriver au résultat escompté.
