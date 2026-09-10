@@ -1488,6 +1488,20 @@ function setupNativeMenus() {
         }
     });
 
+    document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+        const key = e.key.toLowerCase();
+        switch (key) {
+            case 'w': e.preventDefault(); toggleWave(); break;
+            case 'e': e.preventDefault(); document.getElementById('starEnabled').click(); break;
+            case 'c': e.preventDefault(); document.getElementById('waveColorEnabled').click(); break;
+            case 'f': e.preventDefault(); toggleFlash(); break;
+            case 't': e.preventDefault(); handleTapTempo(); break;
+            case 'h': e.preventDefault(); document.getElementById('helpModal').style.display = 'block'; break;
+            case ' ': e.preventDefault(); allBlack(); break;
+        }
+    });
+
     // File operations
     window.electronAPI.file.onLoaded((data) => {
         if (data && data.fixtures) {
