@@ -3,7 +3,7 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+<< /Type /Pages /Kids [5 0 R 7 0 R] /Count 2 >>
 endobj
 3 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
@@ -15,7 +15,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
 endobj
 6 0 obj
-<< /Length 5127 >>
+<< /Length 5537 >>
 stream
 BT 0 0.55 0.7 rg /F2 18 Tf 1 0 0 1 50.0 782.0 Tm (LumiDMX - Contrôles MIDI) Tj ET
 BT 0.25 0.25 0.25 rg /F1 10 Tf 1 0 0 1 50.0 758.0 Tm (Vague, Flash, scènes, chansons - canal MIDI configurable \(défaut : 7\)) Tj ET
@@ -64,52 +64,77 @@ BT /F1 10 Tf 1 0 0 1 200.0 398.0 Tm (Couleur : 0-63 Aléatoire, 64-127 Choisie) T
 BT /F2 10 Tf 1 0 0 1 50.0 384.0 Tm (CC 103) Tj ET
 BT /F1 10 Tf 1 0 0 1 200.0 384.0 Tm (Couleur flash : preset \(bascule aussi en Choisie\)) Tj ET
 BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 362.0 Tm (Presets couleurs \(CC 101 / 102 / 103\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 346.0 Tm (0-15) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 346.0 Tm (Rouge \(#FF0000\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 332.0 Tm (16-31) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 332.0 Tm (Orange \(#FF8000\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 318.0 Tm (32-47) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 318.0 Tm (Jaune \(#FFFF00\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 304.0 Tm (48-63) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 304.0 Tm (Vert \(#00FF00\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 290.0 Tm (64-79) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 290.0 Tm (Cyan \(#00FFFF\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 276.0 Tm (80-95) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 276.0 Tm (Bleu \(#0000FF\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 262.0 Tm (96-111) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 262.0 Tm (Magenta \(#FF00FF\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 248.0 Tm (112-127) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 248.0 Tm (Blanc \(#FFFFFF\)) Tj ET
-BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 226.0 Tm (Subdivisions \(CC 116 / 117\)) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 210.0 Tm (0-10) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 210.0 Tm (Ronde) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 196.0 Tm (11-31) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 196.0 Tm (Blanche) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 182.0 Tm (32-52) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 182.0 Tm (Noire) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 168.0 Tm (53-74) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 168.0 Tm (Croche) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 154.0 Tm (75-95) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 154.0 Tm (Double-croche) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 140.0 Tm (96-116) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 140.0 Tm (Triple-croche) Tj ET
-BT /F2 10 Tf 1 0 0 1 50.0 126.0 Tm (117-127) Tj ET
-BT /F1 10 Tf 1 0 0 1 200.0 126.0 Tm (Quadruple-croche) Tj ET
-BT 0.25 0.25 0.25 rg /F1 9 Tf 1 0 0 1 50.0 112.0 Tm (Voir aussi laide intégrée \(touche H\) dans lapplication.) Tj ET
-BT 0.4 0.4 0.4 rg /F1 8 Tf 1 0 0 1 485.0 30.0 Tm (Page 1 / 1) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 346.0 Tm (0-7) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 346.0 Tm (Rouge foncé \(#800000\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 332.0 Tm (8-15) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 332.0 Tm (Rouge clair \(#FF3030\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 318.0 Tm (16-23) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 318.0 Tm (Orange foncé \(#995200\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 304.0 Tm (24-31) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 304.0 Tm (Orange clair \(#FFAA40\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 290.0 Tm (32-39) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 290.0 Tm (Jaune foncé \(#999900\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 276.0 Tm (40-47) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 276.0 Tm (Jaune clair \(#FFFF54\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 262.0 Tm (48-55) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 262.0 Tm (Vert foncé \(#007000\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 248.0 Tm (56-63) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 248.0 Tm (Vert clair \(#2BFF2B\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 234.0 Tm (64-71) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 234.0 Tm (Cyan foncé \(#008B8B\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 220.0 Tm (72-79) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 220.0 Tm (Cyan clair \(#4DFFFF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 206.0 Tm (80-87) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 206.0 Tm (Bleu foncé \(#00008B\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 192.0 Tm (88-95) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 192.0 Tm (Bleu clair \(#4D4DFF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 178.0 Tm (96-103) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 178.0 Tm (Magenta foncé \(#8B008B\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 164.0 Tm (104-111) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 164.0 Tm (Magenta clair \(#FF4DFF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 150.0 Tm (112-127) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 150.0 Tm (Blanc \(#FFFFFF\)) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 128.0 Tm (Subdivisions \(CC 116 / 117\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 112.0 Tm (0-10) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 112.0 Tm (Ronde) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 98.0 Tm (11-31) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 98.0 Tm (Blanche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 84.0 Tm (32-52) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 84.0 Tm (Noire) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 70.0 Tm (53-74) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 70.0 Tm (Croche) Tj ET
+BT 0.4 0.4 0.4 rg /F1 8 Tf 1 0 0 1 485.0 30.0 Tm (Page 1 / 2) Tj ET
+endstream
+endobj
+7 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 8 0 R >>
+endobj
+8 0 obj
+<< /Length 513 >>
+stream
+BT /F2 10 Tf 1 0 0 1 50.0 782.0 Tm (75-95) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 782.0 Tm (Double-croche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 768.0 Tm (96-116) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 768.0 Tm (Triple-croche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 754.0 Tm (117-127) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 754.0 Tm (Quadruple-croche) Tj ET
+BT 0.25 0.25 0.25 rg /F1 9 Tf 1 0 0 1 50.0 740.0 Tm (Voir aussi laide intégrée \(touche H\) dans lapplication.) Tj ET
+BT 0.4 0.4 0.4 rg /F1 8 Tf 1 0 0 1 485.0 30.0 Tm (Page 2 / 2) Tj ET
 endstream
 endobj
 xref
-0 7
+0 9
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000115 00000 n 
-0000000212 00000 n 
-0000000314 00000 n 
-0000000450 00000 n 
+0000000121 00000 n 
+0000000218 00000 n 
+0000000320 00000 n 
+0000000456 00000 n 
+0000006044 00000 n 
+0000006180 00000 n 
 trailer
-<< /Size 7 /Root 1 0 R >>
+<< /Size 9 /Root 1 0 R >>
 startxref
-5628
+6743
 %%EOF

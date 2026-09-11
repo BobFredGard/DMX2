@@ -175,7 +175,7 @@ Chaque scène enregistre : fixtures flashEnabled, BPM, subdivisions déclencheur
 | Note F1 (30) | Momentané M4 (ON/OFF) |
 | Program Change | Charger chanson 0-127 |
 
-**Presets couleurs (CC 101/102/103)** : 0-15 Rouge, 16-31 Orange, 32-47 Jaune, 48-63 Vert, 64-79 Cyan, 80-95 Bleu, 96-111 Magenta, 112-127 Blanc.
+**Presets couleurs (CC 101/102/103)** : 0-7 Rouge foncé, 8-15 Rouge clair, 16-23 Orange foncé, 24-31 Orange clair, 32-39 Jaune foncé, 40-47 Jaune clair, 48-55 Vert foncé, 56-63 Vert clair, 64-71 Cyan foncé, 72-79 Cyan clair, 80-87 Bleu foncé, 88-95 Bleu clair, 96-103 Magenta foncé, 104-111 Magenta clair, 112-127 Blanc.
 
 ---
 

@@ -22,6 +22,7 @@ let flashTapTimes = [];
 let flashBPM = null;
 let flashMidiCC = 119;
 let flashIntervalId = null;
+let flashRestoreReqId = null;
 let playlist = [];
 let currentSongIndex = -1;
 let lastSendTime = 0;
@@ -2324,7 +2325,7 @@ function renderMidiPortList() {
 // Cases à cocher : value >= 64 → ON, sinon OFF (déterministe, pas de toggle)
 // Listes : valeur 0-127 mappée sur les options du select
 // Sliders 0-127 (vitesse, scintillement) : valeur CC directe
-// Couleurs presets (8 × 16 valeurs) : idx = floor(value / 16)
+// Couleurs presets (16 presets × 8 valeurs) : idx = floor(value / 8)
 // ============================================
 
 function setToolbarCheckbox(id, on) {
@@ -2341,20 +2342,29 @@ function setFlashSelect(id, value) {
     el.dispatchEvent(new Event('change'));
 }
 
-// Palette presets partagée (CC 101/102/103) : 8 couleurs × 16 valeurs CC
+// Palette presets partagée (CC 101/102/103) : 16 presets × 8 valeurs CC
+// Paires foncé/clair par teinte + blanc unique en zone large (112-127)
 const MIDI_COLOR_PRESETS = [
-    '#ff0000', // Rouge (0-15)
-    '#ff8000', // Orange (16-31)
-    '#ffff00', // Jaune (32-47)
-    '#00ff00', // Vert (48-63)
-    '#00ffff', // Cyan (64-79)
-    '#0000ff', // Bleu (80-95)
-    '#ff00ff', // Magenta (96-111)
+    '#800000', // Rouge foncé (0-7)
+    '#ff3030', // Rouge clair (8-15)
+    '#995200', // Orange foncé (16-23)
+    '#ffaa40', // Orange clair (24-31)
+    '#999900', // Jaune foncé (32-39)
+    '#ffff54', // Jaune clair (40-47)
+    '#007000', // Vert foncé (48-55)
+    '#2bff2b', // Vert clair (56-63)
+    '#008b8b', // Cyan foncé (64-71)
+    '#4dffff', // Cyan clair (72-79)
+    '#00008b', // Bleu foncé (80-87)
+    '#4d4dff', // Bleu clair (88-95)
+    '#8b008b', // Magenta foncé (96-103)
+    '#ff4dff', // Magenta clair (104-111)
+    '#ffffff', // Blanc (112-127)
     '#ffffff'  // Blanc (112-127)
 ];
 
 function midiValueToPreset(value) {
-    return MIDI_COLOR_PRESETS[Math.min(7, Math.floor(value / 16))];
+    return MIDI_COLOR_PRESETS[Math.min(15, Math.floor(value / 8))];
 }
 
 function setToolbarColor(id, hex) {
@@ -3126,16 +3136,13 @@ function toggleFlash() {
             const durationMs = (durationBeats / bpm) * 60000;
             const snap = flashSnapshot;
             flashSnapshot = null;
+            // Retour au noir d'abord, puis fade IN 1s vers les couleurs d'avant-flash
             setTimeout(() => {
-                snap.forEach(sf => {
-                    const fixture = FixtureManager.getFixture(sf.id);
-                    if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
-                });
-                updateAllFixtureDisplays();
-                sendDMXBuffer();
+                if (!isFlashToolbarVisible()) fadeBackFromFlash(snap);
             }, durationMs + 50);
         }
     } else {
+        if (flashRestoreReqId) { cancelAnimationFrame(flashRestoreReqId); flashRestoreReqId = null; }
         if (waveRunning) toggleWave();
         flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
         FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => {
@@ -3162,6 +3169,39 @@ function toggleFlash() {
 
 function isFlashToolbarVisible() {
     return document.getElementById('flashToolbar').style.display !== 'none';
+}
+
+// Fade IN 1s du noir vers les couleurs d'avant-flash (même easing que les scènes)
+function fadeBackFromFlash(snap) {
+    if (flashRestoreReqId) cancelAnimationFrame(flashRestoreReqId);
+    const items = snap
+        .map(sf => {
+            const fixture = FixtureManager.getFixture(sf.id);
+            return fixture ? { fixture, target: sf.channelValues } : null;
+        })
+        .filter(Boolean);
+    if (items.length === 0) return;
+    const starts = items.map(it => new Uint8Array(it.fixture.channelValues));
+    const startTime = performance.now();
+    const duration = 1000;
+    function step(now) {
+        const progress = Math.min((now - startTime) / duration, 1);
+        const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+        items.forEach((it, i) => {
+            const n = Math.min(it.target.length, it.fixture.channelValues.length);
+            for (let c = 0; c < n; c++) {
+                it.fixture.channelValues[c] = Math.round(starts[i][c] + (it.target[c] - starts[i][c]) * ease);
+            }
+        });
+        updateAllFixtureDisplays();
+        sendDMXBuffer();
+        if (progress < 1) {
+            flashRestoreReqId = requestAnimationFrame(step);
+        } else {
+            flashRestoreReqId = null;
+        }
+    }
+    flashRestoreReqId = requestAnimationFrame(step);
 }
 
 function restartFlashEngine() {
