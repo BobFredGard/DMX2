@@ -1926,6 +1926,7 @@ function restoreSceneState(scene) {
 
     if (scene.waveRunning) {
         if (waveRunning) toggleWave();
+        cancelRestoreFade(); // le runWave ci-dessous reprend la main, pas de retour arrière
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
@@ -2166,6 +2167,7 @@ function handleMomentaneDown(e, index) {
     const scene = momentanes[index];
     if (!scene) return;
     if (momentaryFadeId) { cancelAnimationFrame(momentaryFadeId); momentaryFadeId = null; }
+    cancelRestoreFade(); // l'instantané momentané prend le relais
     momentaryPreState = {};
     FixtureManager.getFixtures().forEach(f => {
         if (f.momentaryEnabled !== false) {
@@ -2538,6 +2540,9 @@ function startSceneFade(targetValues, duration, skipWaveStop, skipFlashStop) {
     if (fadeReqId) cancelAnimationFrame(fadeReqId);
     if (!skipWaveStop && waveRunning) toggleWave();
     if (!skipFlashStop && isFlashToolbarVisible()) stopFlashEngine();
+    // Le fade de scène prend le relais : aucun retour arrière ne doit écrire en parallèle
+    // (toggleWave ci-dessus a pu en démarrer un)
+    cancelRestoreFade();
 
     if (duration === 0) {
         applySceneValues(targetValues);
@@ -3170,8 +3175,12 @@ function isFlashToolbarVisible() {
 }
 
 // Fade des couleurs du moment vers celles d'avant vague/flash (même easing que les scènes)
+// Annulé dès qu'une scène, une chanson ou un momentané reprend la main (sinon conflit d'écriture)
+function cancelRestoreFade() {
+    if (restoreFadeReqId) { cancelAnimationFrame(restoreFadeReqId); restoreFadeReqId = null; }
+}
 function fadeBackToSnapshot(snap, duration) {
-    if (restoreFadeReqId) cancelAnimationFrame(restoreFadeReqId);
+    cancelRestoreFade();
     const items = snap
         .map(sf => {
             const fixture = FixtureManager.getFixture(sf.id);
@@ -3985,6 +3994,7 @@ function liveLoadSong(index) {
                 applySongEndState(setData);
             }
         }
+        cancelRestoreFade(); // la transition live prend le relais
         liveTransitionId = requestAnimationFrame(step);
     }
     showToast('→ ' + playlist[index].name);
