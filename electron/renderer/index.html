@@ -104,6 +104,9 @@
                     <tr><td>lall</td><td>Lier tous les canaux</td></tr>
                 </table>
                 <h4>Contrôle MIDI</h4>
+                <div style="margin-bottom:8px;">
+                    <button id="btnMidiPdf" class="btn btn-sm">Ouvrir le PDF des contrôles MIDI</button>
+                </div>
                 <table class="help-table">
                     <tr class="help-group"><td colspan="2">Scènes &amp; chansons</td></tr>
                     <tr><td>CC 1-32</td><td>Activer scène 1 à 32 (valeur &gt; 0)</td></tr>
@@ -115,6 +118,10 @@
                     <tr><td>CC 111</td><td>x2 (double vitesse)</td></tr>
                     <tr><td>CC 112</td><td>Étoiles</td></tr>
                     <tr><td>CC 113</td><td>Plage (couleurs perso)</td></tr>
+                    <tr><td>CC 121</td><td>Vitesse vague (0-127 direct)</td></tr>
+                    <tr><td>CC 122</td><td>Scintillement étoiles (0-127 direct)</td></tr>
+                    <tr><td>CC 101-102</td><td>Plage début / fin : preset couleur (active aussi Plage)</td></tr>
+                    <tr><td colspan="2" style="color:var(--text-muted);">Presets : 0-15 Rouge, 16-31 Orange, 32-47 Jaune, 48-63 Vert, 64-79 Cyan, 80-95 Bleu, 96-111 Magenta, 112-127 Blanc</td></tr>
                     <tr class="help-group"><td colspan="2">Flash</td></tr>
                     <tr><td>CC 114</td><td>Moteur Flash ON/OFF (0-63 = OFF, 64-127 = ON)</td></tr>
                     <tr><td>CC 115</td><td>Inverser (0-63 = OFF, 64-127 = ON)</td></tr>
@@ -123,6 +130,7 @@
                     <tr><td>CC 118</td><td>Mode : 0-42 Aléatoire, 43-85 Séquentiel, 86-127 Groupe de 4</td></tr>
                     <tr><td>CC 119</td><td>Flash ponctuel (64-127 = déclenche)</td></tr>
                     <tr><td>CC 120</td><td>Couleur : 0-63 Aléatoire, 64-127 Choisie</td></tr>
+                    <tr><td>CC 103</td><td>Couleur flash : preset (bascule aussi en Choisie, mêmes presets que CC 101-102)</td></tr>
                 </table>
                 <h4>Menus système</h4>
                 <table class="help-table">

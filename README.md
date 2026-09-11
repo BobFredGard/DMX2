@@ -164,12 +164,18 @@ Chaque scène enregistre : fixtures flashEnabled, BPM, subdivisions déclencheur
 | CC 118 | Flash : Mode (0-42 aléatoire, 43-85 séquentiel, 86-127 groupe de 4) |
 | CC 119 | Déclencher flash (oneshot) |
 | CC 120 | Flash : Couleur (<64 aléatoire, ≥64 choisie) |
+| CC 121 | Vague : Vitesse (0-127 direct) |
+| CC 122 | Vague : Scintillement étoiles (0-127 direct) |
+| CC 101-102 | Plage début / fin : preset couleur (active aussi Plage) |
+| CC 103 | Couleur flash : preset (bascule aussi en Choisie) |
 | CC 124-127 | Activer momentanés M1 à M4 |
 | Note C1 (24) | Momentané M1 (ON/OFF) |
 | Note D1 (26) | Momentané M2 (ON/OFF) |
 | Note E1 (28) | Momentané M3 (ON/OFF) |
 | Note F1 (30) | Momentané M4 (ON/OFF) |
 | Program Change | Charger chanson 0-127 |
+
+**Presets couleurs (CC 101/102/103)** : 0-15 Rouge, 16-31 Orange, 32-47 Jaune, 48-63 Vert, 64-79 Cyan, 80-95 Bleu, 96-111 Magenta, 112-127 Blanc.
 
 ---
 

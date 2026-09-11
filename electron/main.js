@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain, session, Menu, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, session, Menu, dialog, shell } = require('electron');
 const path = require('path');
 const fs = require('fs');
 const { SerialPort } = require('serialport');
@@ -454,6 +454,17 @@ ipcMain.handle('file:get-last', async () => {
         } catch (e) {}
     }
     return null;
+});
+
+ipcMain.handle('file:open-midi-pdf', async () => {
+    const pdfPath = path.join(__dirname, 'renderer', 'data', 'midi-mapping.pdf');
+    try {
+        const err = await shell.openPath(pdfPath);
+        if (err) return { success: false, error: err };
+        return { success: true };
+    } catch (e) {
+        return { success: false, error: e.message };
+    }
 });
 
 // ============================================

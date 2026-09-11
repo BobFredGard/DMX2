@@ -1565,6 +1565,10 @@ function setupNativeMenus() {
     document.getElementById('closeHelp').addEventListener('click', () => {
         document.getElementById('helpModal').style.display = 'none';
     });
+    const btnMidiPdf = document.getElementById('btnMidiPdf');
+    if (btnMidiPdf) btnMidiPdf.addEventListener('click', () => {
+        if (window.electronAPI && window.electronAPI.openMidiPdf) window.electronAPI.openMidiPdf();
+    });
     document.getElementById('helpModal').addEventListener('click', (e) => {
         if (e.target === document.getElementById('helpModal')) {
             document.getElementById('helpModal').style.display = 'none';
@@ -2316,9 +2320,11 @@ function renderMidiPortList() {
 }
 
 // ============================================
-// MIDI → TOOLBARS VAGUE / FLASH (CC 110-118, 120)
+// MIDI → TOOLBARS VAGUE / FLASH (CC 101-103, 110-118, 120-122)
 // Cases à cocher : value >= 64 → ON, sinon OFF (déterministe, pas de toggle)
 // Listes : valeur 0-127 mappée sur les options du select
+// Sliders 0-127 (vitesse, scintillement) : valeur CC directe
+// Couleurs presets (8 × 16 valeurs) : idx = floor(value / 16)
 // ============================================
 
 function setToolbarCheckbox(id, on) {
@@ -2333,6 +2339,30 @@ function setFlashSelect(id, value) {
     if (!el || el.value === value) return;
     el.value = value;
     el.dispatchEvent(new Event('change'));
+}
+
+// Palette presets partagée (CC 101/102/103) : 8 couleurs × 16 valeurs CC
+const MIDI_COLOR_PRESETS = [
+    '#ff0000', // Rouge (0-15)
+    '#ff8000', // Orange (16-31)
+    '#ffff00', // Jaune (32-47)
+    '#00ff00', // Vert (48-63)
+    '#00ffff', // Cyan (64-79)
+    '#0000ff', // Bleu (80-95)
+    '#ff00ff', // Magenta (96-111)
+    '#ffffff'  // Blanc (112-127)
+];
+
+function midiValueToPreset(value) {
+    return MIDI_COLOR_PRESETS[Math.min(7, Math.floor(value / 16))];
+}
+
+function setToolbarColor(id, hex) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.value = hex;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('change', { bubbles: true }));
 }
 
 function handleToolbarCC(cc, value) {
@@ -2374,6 +2404,25 @@ function handleToolbarCC(cc, value) {
         case 120: // Couleur flash (random / specific)
             setFlashSelect('flashColorMode', on ? 'specific' : 'random');
             return true;
+        case 101: // Plage début (preset) + active Plage
+            setToolbarColor('waveColorStart', midiValueToPreset(value));
+            setToolbarCheckbox('waveColorEnabled', true);
+            return true;
+        case 102: // Plage fin (preset) + active Plage
+            setToolbarColor('waveColorEnd', midiValueToPreset(value));
+            setToolbarCheckbox('waveColorEnabled', true);
+            return true;
+        case 103: // Couleur flash (preset) + bascule en Choisie
+            setToolbarColor('flashColor', midiValueToPreset(value));
+            setFlashSelect('flashColorMode', 'specific');
+            return true;
+        case 121: // Vitesse vague (slider 0-127 : mapping CC direct, relu à chaque frame)
+        case 122: { // Scintillement étoiles (slider 0-127 : mapping CC direct)
+            const id = cc === 121 ? 'waveSpeed' : 'starFreq';
+            const el = document.getElementById(id);
+            if (el) el.value = Math.max(0, Math.min(127, value));
+            return true;
+        }
         default:
             return false;
     }
@@ -2430,7 +2479,7 @@ function handleMIDIMessage(msg) {
         return;
     }
 
-    // CC 110-118 + 120 → cases et listes des bandeaux vague/flash
+    // CC 101-103, 110-122 → presets, cases, listes et sliders des bandeaux vague/flash
     if (handleToolbarCC(cc, value)) return;
 
     let mode, sceneIndex;

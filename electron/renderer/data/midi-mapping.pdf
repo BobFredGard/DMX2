@@ -1,0 +1,115 @@
+%PDF-1.4
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [5 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 6 0 R >>
+endobj
+6 0 obj
+<< /Length 5127 >>
+stream
+BT 0 0.55 0.7 rg /F2 18 Tf 1 0 0 1 50.0 782.0 Tm (LumiDMX - Contrôles MIDI) Tj ET
+BT 0.25 0.25 0.25 rg /F1 10 Tf 1 0 0 1 50.0 758.0 Tm (Vague, Flash, scènes, chansons - canal MIDI configurable \(défaut : 7\)) Tj ET
+BT 0.25 0.25 0.25 rg /F1 9 Tf 1 0 0 1 50.0 738.0 Tm (Convention ON/OFF : 0-63 = OFF, 64-127 = ON \(sauf mention contraire\).) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 714.0 Tm (Scènes et chansons) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 698.0 Tm (CC 1-32) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 698.0 Tm (Scène 1 à 32 \(valeur > 0\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 684.0 Tm (CC 124-127) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 684.0 Tm (Momentanés M1 à M4 \(127 = pressé, 0 = relâché\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 670.0 Tm (Notes 24/26/28/30) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 670.0 Tm (Momentanés M1 à M4, C1/D1/E1/F1 \(vélocité > 0 = pressé\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 656.0 Tm (Program Change) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 656.0 Tm (Chanson 0-127) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 634.0 Tm (Vague) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 618.0 Tm (CC 110) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 618.0 Tm (Moteur Vague ON/OFF) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 604.0 Tm (CC 111) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 604.0 Tm (x2 \(double vitesse\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 590.0 Tm (CC 112) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 590.0 Tm (Étoiles) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 576.0 Tm (CC 113) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 576.0 Tm (Plage \(couleurs perso\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 562.0 Tm (CC 121) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 562.0 Tm (Vitesse \(0-127 direct\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 548.0 Tm (CC 122) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 548.0 Tm (Scintillement étoiles \(0-127 direct\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 534.0 Tm (CC 101) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 534.0 Tm (Plage début : preset couleur \(active aussi Plage\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 520.0 Tm (CC 102) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 520.0 Tm (Plage fin : preset couleur \(active aussi Plage\)) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 498.0 Tm (Flash) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 482.0 Tm (CC 114) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 482.0 Tm (Moteur Flash ON/OFF) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 468.0 Tm (CC 115) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 468.0 Tm (Inverser) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 454.0 Tm (CC 116) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 454.0 Tm (Déclencher : voir subdivisions ci-dessous) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 440.0 Tm (CC 117) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 440.0 Tm (Durée : voir subdivisions ci-dessous) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 426.0 Tm (CC 118) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 426.0 Tm (Mode : 0-42 Aléatoire, 43-85 Séquentiel, 86-127 Groupe de 4) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 412.0 Tm (CC 119) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 412.0 Tm (Flash ponctuel \(64-127 = déclenche\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 398.0 Tm (CC 120) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 398.0 Tm (Couleur : 0-63 Aléatoire, 64-127 Choisie) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 384.0 Tm (CC 103) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 384.0 Tm (Couleur flash : preset \(bascule aussi en Choisie\)) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 362.0 Tm (Presets couleurs \(CC 101 / 102 / 103\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 346.0 Tm (0-15) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 346.0 Tm (Rouge \(#FF0000\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 332.0 Tm (16-31) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 332.0 Tm (Orange \(#FF8000\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 318.0 Tm (32-47) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 318.0 Tm (Jaune \(#FFFF00\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 304.0 Tm (48-63) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 304.0 Tm (Vert \(#00FF00\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 290.0 Tm (64-79) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 290.0 Tm (Cyan \(#00FFFF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 276.0 Tm (80-95) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 276.0 Tm (Bleu \(#0000FF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 262.0 Tm (96-111) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 262.0 Tm (Magenta \(#FF00FF\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 248.0 Tm (112-127) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 248.0 Tm (Blanc \(#FFFFFF\)) Tj ET
+BT 0 0.55 0.7 rg /F2 12 Tf 1 0 0 1 50.0 226.0 Tm (Subdivisions \(CC 116 / 117\)) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 210.0 Tm (0-10) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 210.0 Tm (Ronde) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 196.0 Tm (11-31) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 196.0 Tm (Blanche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 182.0 Tm (32-52) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 182.0 Tm (Noire) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 168.0 Tm (53-74) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 168.0 Tm (Croche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 154.0 Tm (75-95) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 154.0 Tm (Double-croche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 140.0 Tm (96-116) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 140.0 Tm (Triple-croche) Tj ET
+BT /F2 10 Tf 1 0 0 1 50.0 126.0 Tm (117-127) Tj ET
+BT /F1 10 Tf 1 0 0 1 200.0 126.0 Tm (Quadruple-croche) Tj ET
+BT 0.25 0.25 0.25 rg /F1 9 Tf 1 0 0 1 50.0 112.0 Tm (Voir aussi laide intégrée \(touche H\) dans lapplication.) Tj ET
+BT 0.4 0.4 0.4 rg /F1 8 Tf 1 0 0 1 485.0 30.0 Tm (Page 1 / 1) Tj ET
+endstream
+endobj
+xref
+0 7
+0000000000 65535 f 
+0000000009 00000 n 
+0000000058 00000 n 
+0000000115 00000 n 
+0000000212 00000 n 
+0000000314 00000 n 
+0000000450 00000 n 
+trailer
+<< /Size 7 /Root 1 0 R >>
+startxref
+5628
+%%EOF

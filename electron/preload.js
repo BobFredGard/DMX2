@@ -38,6 +38,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     onMenu: (channel, callback) => ipcRenderer.on(channel, (event, ...args) => callback(...args)),
     onBeforeQuit: (callback) => ipcRenderer.on('app:before-quit', (event) => callback()),
     quitConfirmed: (save) => ipcRenderer.send('app:quit-confirmed', save),
+    openMidiPdf: async () => {
+        try { return await ipcRenderer.invoke('file:open-midi-pdf'); }
+        catch (e) { return { success: false, error: e.message }; }
+    },
     file: {
         save: async (data) => {
             try { return await ipcRenderer.invoke('file:save', data); }
