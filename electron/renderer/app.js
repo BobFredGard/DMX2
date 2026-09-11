@@ -2315,6 +2315,70 @@ function renderMidiPortList() {
     });
 }
 
+// ============================================
+// MIDI → TOOLBARS VAGUE / FLASH (CC 110-118, 120)
+// Cases à cocher : value >= 64 → ON, sinon OFF (déterministe, pas de toggle)
+// Listes : valeur 0-127 mappée sur les options du select
+// ============================================
+
+function setToolbarCheckbox(id, on) {
+    const el = document.getElementById(id);
+    if (!el || el.checked === on) return;
+    el.checked = on;
+    el.dispatchEvent(new Event('change'));
+}
+
+function setFlashSelect(id, value) {
+    const el = document.getElementById(id);
+    if (!el || el.value === value) return;
+    el.value = value;
+    el.dispatchEvent(new Event('change'));
+}
+
+function handleToolbarCC(cc, value) {
+    const on = value >= 64;
+    switch (cc) {
+        case 110: // Vague ON/OFF (moteur)
+            if (on !== !!waveRunning) toggleWave();
+            return true;
+        case 111: // x2
+            setToolbarCheckbox('waveSpeedX2', on);
+            return true;
+        case 112: // Étoiles
+            setToolbarCheckbox('starEnabled', on);
+            return true;
+        case 113: // Plage (couleurs perso)
+            setToolbarCheckbox('waveColorEnabled', on);
+            return true;
+        case 114: // Flash ON/OFF (moteur)
+            if (on !== isFlashToolbarVisible()) toggleFlash();
+            return true;
+        case 115: // Inverser
+            setToolbarCheckbox('flashReverse', on);
+            return true;
+        case 116: // Déclencher (7 subdivisions)
+        case 117: { // Durée (7 subdivisions)
+            const id = cc === 116 ? 'flashTrigger' : 'flashDuration';
+            const sel = document.getElementById(id);
+            if (!sel) return true;
+            const idx = Math.round((value / 127) * (sel.options.length - 1));
+            setFlashSelect(id, sel.options[idx].value);
+            return true;
+        }
+        case 118: { // Mode (3 options : random / sequential / group4)
+            const modes = ['random', 'sequential', 'group4'];
+            const idx = value < 43 ? 0 : (value < 86 ? 1 : 2);
+            setFlashSelect('flashMode', modes[idx]);
+            return true;
+        }
+        case 120: // Couleur flash (random / specific)
+            setFlashSelect('flashColorMode', on ? 'specific' : 'random');
+            return true;
+        default:
+            return false;
+    }
+}
+
 function handleMIDIMessage(msg) {
     flashMidiDot();
     const [status, cc, value] = msg.data;
@@ -2357,14 +2421,17 @@ function handleMIDIMessage(msg) {
         }
     }
 
-    // Control Change → scènes
+    // Control Change → scènes / toolbars vague+flash
     if (command !== 0xB0 || channel !== midiChannel) return;
-    if (cc < 0 || cc > 119) return;
+    if (cc < 0 || cc > 127) return;
 
     if (cc === flashMidiCC) {
         if (value >= 64) triggerFlashFromMIDI();
         return;
     }
+
+    // CC 110-118 + 120 → cases et listes des bandeaux vague/flash
+    if (handleToolbarCC(cc, value)) return;
 
     let mode, sceneIndex;
     if (cc >= 1 && cc <= 32) {

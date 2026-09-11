@@ -1492,6 +1492,15 @@ body.sidebar-open .bottom-bar {
     border-bottom: 1px solid rgba(255,255,255,0.1);
     padding-bottom: 4px;
 }
+.help-table tr.help-group td {
+    color: #fff;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding-top: 10px;
+    border-bottom: 1px solid rgba(0,180,220,0.35);
+}
 
 /* ============================================
    OPTIONS MODAL

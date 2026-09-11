@@ -156,7 +156,14 @@ Chaque scène enregistre : fixtures flashEnabled, BPM, subdivisions déclencheur
 | Message MIDI | Action |
 |--------------|--------|
 | CC 1-32 | Activer scène 1 à 32 |
+| CC 110 | Vague ON/OFF (≥64 ON, sinon OFF) |
+| CC 111-113 | Vague : x2, Étoiles, Plage (≥64 ON) |
+| CC 114 | Flash ON/OFF (≥64 ON, sinon OFF) |
+| CC 115 | Flash : Inverser (≥64 ON) |
+| CC 116-117 | Flash : Déclencher / Durée (0-127 → subdivision) |
+| CC 118 | Flash : Mode (0-42 aléatoire, 43-85 séquentiel, 86-127 groupe de 4) |
 | CC 119 | Déclencher flash (oneshot) |
+| CC 120 | Flash : Couleur (<64 aléatoire, ≥64 choisie) |
 | CC 124-127 | Activer momentanés M1 à M4 |
 | Note C1 (24) | Momentané M1 (ON/OFF) |
 | Note D1 (26) | Momentané M2 (ON/OFF) |

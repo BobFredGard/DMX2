@@ -66,7 +66,7 @@
 
     <!-- Help Modal -->
     <div id="helpModal" class="modal" style="display:none;">
-        <div class="modal-content" style="max-width:500px;">
+        <div class="modal-content" style="max-width:580px;">
             <div class="modal-header">
                 <h2>Aide - Raccourcis</h2>
                 <span class="close" id="closeHelp">&times;</span>
@@ -105,14 +105,24 @@
                 </table>
                 <h4>Contrôle MIDI</h4>
                 <table class="help-table">
-                    <tr><td>CC 1-32</td><td>Activer scènes 1 à 32</td></tr>
-                    <tr><td>CC 119</td><td>Déclencher le flash</td></tr>
-                    <tr><td>CC 124-127</td><td>Activer momentanés M1 à M4</td></tr>
-                    <tr><td>Note C1 (24)</td><td>Momentané M1 (ON/OFF)</td></tr>
-                    <tr><td>Note D1 (26)</td><td>Momentané M2 (ON/OFF)</td></tr>
-                    <tr><td>Note E1 (28)</td><td>Momentané M3 (ON/OFF)</td></tr>
-                    <tr><td>Note F1 (30)</td><td>Momentané M4 (ON/OFF)</td></tr>
+                    <tr class="help-group"><td colspan="2">Scènes &amp; chansons</td></tr>
+                    <tr><td>CC 1-32</td><td>Activer scène 1 à 32 (valeur &gt; 0)</td></tr>
+                    <tr><td>CC 124-127</td><td>Momentanés M1 à M4 (127 = pressé, 0 = relâché)</td></tr>
+                    <tr><td>Notes 24/26/28/30</td><td>Momentanés M1 à M4, C1/D1/E1/F1 (vélocité &gt; 0 = pressé)</td></tr>
                     <tr><td>Program Change</td><td>Charger chanson 0-127</td></tr>
+                    <tr class="help-group"><td colspan="2">Vague (0-63 = OFF, 64-127 = ON)</td></tr>
+                    <tr><td>CC 110</td><td>Moteur Vague ON/OFF</td></tr>
+                    <tr><td>CC 111</td><td>x2 (double vitesse)</td></tr>
+                    <tr><td>CC 112</td><td>Étoiles</td></tr>
+                    <tr><td>CC 113</td><td>Plage (couleurs perso)</td></tr>
+                    <tr class="help-group"><td colspan="2">Flash</td></tr>
+                    <tr><td>CC 114</td><td>Moteur Flash ON/OFF (0-63 = OFF, 64-127 = ON)</td></tr>
+                    <tr><td>CC 115</td><td>Inverser (0-63 = OFF, 64-127 = ON)</td></tr>
+                    <tr><td>CC 116</td><td>Déclencher : 0-10 Ronde, 11-31 Blanche, 32-52 Noire, 53-74 Croche, 75-95 Double-croche, 96-116 Triple-croche, 117-127 Quadruple-croche</td></tr>
+                    <tr><td>CC 117</td><td>Durée : mêmes plages que Déclencher</td></tr>
+                    <tr><td>CC 118</td><td>Mode : 0-42 Aléatoire, 43-85 Séquentiel, 86-127 Groupe de 4</td></tr>
+                    <tr><td>CC 119</td><td>Flash ponctuel (64-127 = déclenche)</td></tr>
+                    <tr><td>CC 120</td><td>Couleur : 0-63 Aléatoire, 64-127 Choisie</td></tr>
                 </table>
                 <h4>Menus système</h4>
                 <table class="help-table">
