@@ -1925,16 +1925,28 @@ function restoreSceneState(scene) {
     }
 
     if (scene.waveRunning) {
-        if (waveRunning) toggleWave();
-        cancelRestoreFade(); // le runWave ci-dessous reprend la main, pas de retour arrière
-        waveRunning = true;
-        waveOffset = 0;
-        waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
-        document.getElementById('btnWave').textContent = 'Stop Vague';
-        document.getElementById('btnWave').classList.add('active');
-        document.getElementById('waveToolbar').style.display = '';
-        syncWaveButton();
-        runWave();
+        if (waveRunning) {
+            // Transition directe ancienne → nouvelle vague : pas de stop/restart,
+            // continuité de phase (waveOffset conservé), fondu 1s depuis l'état live
+            cancelRestoreFade();
+            waveFadeMap = new Map();
+            FixtureManager.getFixtures().forEach(f => waveFadeMap.set(f.id, new Uint8Array(f.channelValues)));
+            waveStartTime = performance.now();
+            // Note : les fixtures sorties de la vague sont reprises par le fade de
+            // scène qui suit (startSceneFade les inclut), pas de retour snapshot ici.
+            document.getElementById('waveToolbar').style.display = '';
+            syncWaveButton();
+        } else {
+            waveRunning = true;
+            waveOffset = 0;
+            waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
+            beginWaveFade();
+            document.getElementById('btnWave').textContent = 'Stop Vague';
+            document.getElementById('btnWave').classList.add('active');
+            document.getElementById('waveToolbar').style.display = '';
+            syncWaveButton();
+            runWave();
+        }
     }
     if (scene.flashRunning) {
         if (isFlashToolbarVisible()) stopFlashEngine();
@@ -2813,6 +2825,7 @@ function toggleWave() {
         waveRunning = true;
         waveOffset = 0;
         waveSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
+        beginWaveFade();
         btn.textContent = 'Stop Vague';
         btn.classList.add('active');
         waveToolbar.style.display = '';
@@ -2821,6 +2834,15 @@ function toggleWave() {
 }
 
 let waveFrameCount = 0;
+let waveFadeMap = null;
+let waveStartTime = 0;
+
+// Prépare le fondu d'entrée 1s : mixage couleurs actuelles → vague (relit waveSnapshot)
+function beginWaveFade() {
+    waveStartTime = performance.now();
+    waveFadeMap = new Map();
+    (waveSnapshot || []).forEach(sf => waveFadeMap.set(sf.id, sf.channelValues));
+}
 function runWave() {
     if (!waveRunning) return;
 
@@ -2845,6 +2867,17 @@ function runWave() {
         }
 
         const now = performance.now();
+
+        // Fondu d'entrée 1s : 0 = couleurs d'avant-vague, 1 = pleine vague
+        let waveBlend = 1;
+        if (waveFadeMap) {
+            const p = Math.min((now - waveStartTime) / 1000, 1);
+            if (p >= 1) {
+                waveFadeMap = null;
+            } else {
+                waveBlend = p < 0.5 ? 2 * p * p : 1 - Math.pow(-2 * p + 2, 2) / 2;
+            }
+        }
 
         if (starsOn) {
             const waveFixtures = FixtureManager.getFixtures().filter(f => f.waveEnabled);
@@ -2909,10 +2942,27 @@ function runWave() {
 
                 if (zoneCount > 1) {
                     const off = (zoneCount - 1 - zMapped) * 3;
+                    if (waveBlend < 1 && waveFadeMap) {
+                        const sVals = waveFadeMap.get(fixture.id);
+                        if (sVals) {
+                            r = Math.round((sVals[off] || 0) + (r - (sVals[off] || 0)) * waveBlend);
+                            g = Math.round((sVals[off + 1] || 0) + (g - (sVals[off + 1] || 0)) * waveBlend);
+                            b = Math.round((sVals[off + 2] || 0) + (b - (sVals[off + 2] || 0)) * waveBlend);
+                        }
+                    }
                     FixtureManager.setChannelValue(fixture.id, off, r);
                     FixtureManager.setChannelValue(fixture.id, off + 1, g);
                     FixtureManager.setChannelValue(fixture.id, off + 2, b);
                 } else {
+                    if (waveBlend < 1 && waveFadeMap) {
+                        const sVals = waveFadeMap.get(fixture.id);
+                        const offsets = sVals ? getRGBChannelOffsets(fixture) : null;
+                        if (sVals && offsets) {
+                            r = Math.round((sVals[offsets.r] || 0) + (r - (sVals[offsets.r] || 0)) * waveBlend);
+                            g = Math.round((sVals[offsets.g] || 0) + (g - (sVals[offsets.g] || 0)) * waveBlend);
+                            b = Math.round((sVals[offsets.b] || 0) + (b - (sVals[offsets.b] || 0)) * waveBlend);
+                        }
+                    }
                     FixtureManager.applyColorToFixture(fixture.id, r, g, b);
                 }
 
