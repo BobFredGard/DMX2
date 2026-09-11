@@ -22,7 +22,7 @@ let flashTapTimes = [];
 let flashBPM = null;
 let flashMidiCC = 119;
 let flashIntervalId = null;
-let flashRestoreReqId = null;
+let restoreFadeReqId = null;
 let playlist = [];
 let currentSongIndex = -1;
 let lastSendTime = 0;
@@ -2779,15 +2779,13 @@ function toggleWave() {
         btn.classList.remove('active');
         waveToolbar.style.display = 'none';
         if (waveSnapshot) {
-            waveSnapshot.forEach(sf => {
-                const fixture = FixtureManager.getFixture(sf.id);
-                if (fixture) sf.channelValues.forEach((val, idx) => fixture.channelValues[idx] = val);
-            });
-            updateAllFixtureDisplays();
-            sendDMXBuffer();
+            const snap = waveSnapshot;
             waveSnapshot = null;
+            // Transition 2s des couleurs actives de la vague vers celles d'avant
+            fadeBackToSnapshot(snap, 2000);
         }
     } else {
+        if (restoreFadeReqId) { cancelAnimationFrame(restoreFadeReqId); restoreFadeReqId = null; }
         const flashToolbar = document.getElementById('flashToolbar');
         if (flashIntervalId || (flashToolbar && flashToolbar.style.display !== 'none')) {
             stopFlashEngine();
@@ -3138,11 +3136,11 @@ function toggleFlash() {
             flashSnapshot = null;
             // Retour au noir d'abord, puis fade IN 1s vers les couleurs d'avant-flash
             setTimeout(() => {
-                if (!isFlashToolbarVisible()) fadeBackFromFlash(snap);
+                if (!isFlashToolbarVisible()) fadeBackToSnapshot(snap, 1000);
             }, durationMs + 50);
         }
     } else {
-        if (flashRestoreReqId) { cancelAnimationFrame(flashRestoreReqId); flashRestoreReqId = null; }
+        if (restoreFadeReqId) { cancelAnimationFrame(restoreFadeReqId); restoreFadeReqId = null; }
         if (waveRunning) toggleWave();
         flashSnapshot = FixtureManager.getFixtures().map(f => ({ id: f.id, channelValues: new Uint8Array(f.channelValues) }));
         FixtureManager.getFixtures().filter(f => f.flashEnabled).forEach(f => {
@@ -3171,9 +3169,9 @@ function isFlashToolbarVisible() {
     return document.getElementById('flashToolbar').style.display !== 'none';
 }
 
-// Fade IN 1s du noir vers les couleurs d'avant-flash (même easing que les scènes)
-function fadeBackFromFlash(snap) {
-    if (flashRestoreReqId) cancelAnimationFrame(flashRestoreReqId);
+// Fade des couleurs du moment vers celles d'avant vague/flash (même easing que les scènes)
+function fadeBackToSnapshot(snap, duration) {
+    if (restoreFadeReqId) cancelAnimationFrame(restoreFadeReqId);
     const items = snap
         .map(sf => {
             const fixture = FixtureManager.getFixture(sf.id);
@@ -3183,7 +3181,6 @@ function fadeBackFromFlash(snap) {
     if (items.length === 0) return;
     const starts = items.map(it => new Uint8Array(it.fixture.channelValues));
     const startTime = performance.now();
-    const duration = 1000;
     function step(now) {
         const progress = Math.min((now - startTime) / duration, 1);
         const ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
@@ -3196,12 +3193,12 @@ function fadeBackFromFlash(snap) {
         updateAllFixtureDisplays();
         sendDMXBuffer();
         if (progress < 1) {
-            flashRestoreReqId = requestAnimationFrame(step);
+            restoreFadeReqId = requestAnimationFrame(step);
         } else {
-            flashRestoreReqId = null;
+            restoreFadeReqId = null;
         }
     }
-    flashRestoreReqId = requestAnimationFrame(step);
+    restoreFadeReqId = requestAnimationFrame(step);
 }
 
 function restartFlashEngine() {
