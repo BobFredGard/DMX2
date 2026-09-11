@@ -457,8 +457,13 @@ ipcMain.handle('file:get-last', async () => {
 });
 
 ipcMain.handle('file:open-midi-pdf', async () => {
-    const pdfPath = path.join(__dirname, 'renderer', 'data', 'midi-mapping.pdf');
+    // Packagé : le PDF est déballé hors asar (asarUnpack) car shell.openPath
+    // ne peut pas ouvrir un chemin virtuel dans app.asar. Dev : chemin direct.
+    const unpacked = path.join(process.resourcesPath || '', 'app.asar.unpacked', 'renderer', 'data', 'midi-mapping.pdf');
+    const dev = path.join(__dirname, 'renderer', 'data', 'midi-mapping.pdf');
+    const pdfPath = (app.isPackaged && fs.existsSync(unpacked)) ? unpacked : dev;
     try {
+        if (!fs.existsSync(pdfPath)) return { success: false, error: 'PDF introuvable : ' + pdfPath };
         const err = await shell.openPath(pdfPath);
         if (err) return { success: false, error: err };
         return { success: true };

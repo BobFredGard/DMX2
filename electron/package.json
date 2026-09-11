@@ -20,6 +20,9 @@
       "cpu-affinity.js",
       "renderer/**/*"
     ],
+    "asarUnpack": [
+      "renderer/data/midi-mapping.pdf"
+    ],
     "win": {
       "target": "nsis",
       "icon": "build/icon.ico",
