@@ -43,8 +43,7 @@ fn close_serial(state: State<SerialState>) -> Result<(), String> {
 }
 
 // Trame LumiDMX : FF 00 NB_H NB_L CH1..CHn CHECKSUM(XOR), cf. electron/main.js (dmx:send)
-#[tauri::command]
-fn send_dmx(state: State<SerialState>, channels: Vec<u8>) -> Result<(), String> {
+fn build_dmx_packet(channels: &[u8]) -> Vec<u8> {
     let nb = channels.len();
     let mut packet = Vec::with_capacity(4 + nb + 1);
     packet.push(0xFF);
@@ -52,11 +51,17 @@ fn send_dmx(state: State<SerialState>, channels: Vec<u8>) -> Result<(), String> 
     packet.push(((nb >> 8) & 0xFF) as u8);
     packet.push((nb & 0xFF) as u8);
     let mut checksum = packet[2] ^ packet[3];
-    for c in &channels {
+    for c in channels {
         packet.push(*c);
         checksum ^= *c;
     }
     packet.push(checksum);
+    packet
+}
+
+#[tauri::command]
+fn send_dmx(state: State<SerialState>, channels: Vec<u8>) -> Result<(), String> {
+    let packet = build_dmx_packet(&channels);
     let mut guard = state.0.lock().map_err(|e| e.to_string())?;
     let port = guard.as_mut().ok_or("port serie ferme")?;
     use std::io::Write;
@@ -142,4 +147,35 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("erreur au lancement du prototype Tauri");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dmx_packet_format() {
+        // [0x01, 0x02] -> FF 00 00 02 01 02 CHK(0^2^1^2 = 1)
+        assert_eq!(build_dmx_packet(&[0x01, 0x02]), vec![0xFF, 0x00, 0x00, 0x02, 0x01, 0x02, 0x01]);
+    }
+
+    #[test]
+    fn dmx_packet_empty() {
+        assert_eq!(build_dmx_packet(&[]), vec![0xFF, 0x00, 0x00, 0x00, 0x00]);
+    }
+
+    #[test]
+    fn dmx_packet_checksum_xor() {
+        let channels: Vec<u8> = (0..64u8).collect();
+        let packet = build_dmx_packet(&channels);
+        assert_eq!(packet.len(), 4 + 64 + 1);
+        assert_eq!(packet[0], 0xFF);
+        assert_eq!(packet[1], 0x00);
+        assert_eq!((packet[2], packet[3]), (0x00, 0x40));
+        let mut chk = packet[2] ^ packet[3];
+        for c in &packet[4..4 + 64] {
+            chk ^= *c;
+        }
+        assert_eq!(*packet.last().unwrap(), chk);
+    }
 }
