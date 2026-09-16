@@ -20,11 +20,15 @@ cargo check
 `CARGO_TARGET_DIR` hors iCloud : évite les verrous de synchro constatés sur ce repo.
 
 ## Lancer (nécessite WebView2, présent sur Win10/11)
-Tauri CLI via cargo (une fois) : `cargo install tauri-cli --locked`, puis
+L'UI est embarquée en direct (`frontendDist`), aucun serveur requis :
 ```powershell
+$env:CARGO_TARGET_DIR = "C:\Users\PCCAO\AppData\Local\Temp\opencode\cargo-target"
+$env:Path = "C:\Users\PCCAO\.cargo\bin;" + $env:Path
 cd tauri-proto\src-tauri
-tauri dev
+cargo run
 ```
+Au chargement, l'UI appelle `list_serial_ports` toute seule (preuve du bridge,
+tracée `proto: commande … reçue` dans la sortie).
 
 ## Fichiers
 - `src-tauri/Cargo.toml` : `tauri 2`, `serialport 4`, `midir 0.10`, `serde`

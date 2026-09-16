@@ -66,4 +66,12 @@ if (!T) {
   });
 
   log('proto prêt.');
+  // Appel auto au chargement : prouve le round-trip invoke (visible dans la sortie Rust).
+  (async () => {
+    try {
+      const ports = await invoke('list_serial_ports');
+      $('selPorts').innerHTML = ports.map((p) => `<option>${p}</option>`).join('');
+      log(`ports série (auto) : ${ports.join(', ') || '(aucun)'}`);
+    } catch (e) { log(`ERREUR auto-liste : ${e}`); }
+  })();
 }

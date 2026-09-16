@@ -5,8 +5,7 @@
   "identifier": "com.lumidhx.tauri.proto",
   "build": {
     "frontendDist": "../ui",
-    "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "node serve.js",
+    "beforeDevCommand": "",
     "beforeBuildCommand": ""
   },
   "app": {

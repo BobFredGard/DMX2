@@ -21,6 +21,7 @@ struct MidiCc {
 
 #[tauri::command]
 fn list_serial_ports() -> Vec<String> {
+    eprintln!("proto: commande list_serial_ports reçue");
     serialport::available_ports()
         .map(|ports| ports.into_iter().map(|p| p.port_name).collect())
         .unwrap_or_default()
