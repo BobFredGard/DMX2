@@ -6,7 +6,7 @@
   "build": {
     "frontendDist": "../ui",
     "devUrl": "http://localhost:1420",
-    "beforeDevCommand": "node ../serve.js",
+    "beforeDevCommand": "node serve.js",
     "beforeBuildCommand": ""
   },
   "app": {
