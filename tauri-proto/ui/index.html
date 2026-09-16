@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>LumiDMX Tauri Proto</title>
+<style>
+  body { font-family: sans-serif; background: #0d1a2d; color: #eee; margin: 0; padding: 18px; }
+  h1 { color: #00b4dc; font-size: 1.2rem; }
+  section { border: 1px solid rgba(0,180,220,.35); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+  button { margin: 4px; padding: 6px 12px; cursor: pointer; }
+  select, input { margin: 4px; padding: 5px; }
+  #log { background: #000; height: 180px; overflow-y: auto; font-family: monospace; font-size: .8rem; padding: 8px; }
+  .warn { color: #ffaa40; }
+</style>
+</head>
+<body>
+<h1>LumiDMX — Prototype Tauri (série + MIDI)</h1>
+<div id="nontauri" class="warn" style="display:none;">Bridge Tauri absent (page ouverte hors WebView).</div>
+
+<section>
+  <h3>Série</h3>
+  <button id="btnPorts">Lister ports</button>
+  <select id="selPorts"></select>
+  <input id="baud" type="number" value="921600" style="width:90px;">
+  <button id="btnOpen">Ouvrir</button>
+  <button id="btnClose">Fermer</button>
+  <button id="btnDmx">Envoyer trame test (64 canaux)</button>
+</section>
+
+<section>
+  <h3>MIDI (entrée)</h3>
+  <button id="btnMidiPorts">Lister ports MIDI</button>
+  <select id="selMidi"></select>
+  <button id="btnMidiStart">Démarrer écoute</button>
+  <button id="btnMidiStop">Stop</button>
+</section>
+
+<section>
+  <h3>Journal</h3>
+  <div id="log"></div>
+</section>
+
+<script src="main.js"></script>
+</body>
+</html>
